@@ -1,3 +1,5 @@
+package online.umbcraft.libraries;
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;

@@ -1,3 +1,5 @@
+package online.umbcraft.libraries;
+
 import kong.unirest.json.JSONException;
 import kong.unirest.json.JSONObject;
 

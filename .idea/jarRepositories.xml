@@ -2,8 +2,18 @@
 <project version="4">
   <component name="RemoteRepositoriesConfiguration">
     <remote-repository>
-      <option name="id" value="c07f77a7-38df-4dc1-a421-927e8baa4482" />
-      <option name="name" value="c07f77a7-38df-4dc1-a421-927e8baa4482" />
+      <option name="id" value="central" />
+      <option name="name" value="Central Repository" />
+      <option name="url" value="https://repo.maven.apache.org/maven2" />
+    </remote-repository>
+    <remote-repository>
+      <option name="id" value="umbcraft-repo" />
+      <option name="name" value="umbcraft-repo" />
+      <option name="url" value="http://192.168.1.22:27018/repository/umbcraft-repo/" />
+    </remote-repository>
+    <remote-repository>
+      <option name="id" value="umbccraft-repo" />
+      <option name="name" value="umbccraft-repo" />
       <option name="url" value="http://192.168.1.22:27018/repository/umbcraft-repo/" />
     </remote-repository>
   </component>
