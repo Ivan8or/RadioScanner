@@ -3,7 +3,6 @@ import org.apache.commons.codec.binary.Base64;
 import java.security.*;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
-import java.util.concurrent.ExecutionException;
 
 import javax.crypto.Cipher;
 import javax.crypto.KeyGenerator;
@@ -14,24 +13,6 @@ public class MessageEncryptor {
 
     private static final String PUBLIC_KEY_B64 = "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA0b8eOiR6EFHlAdPxabPaLJ1Ca8mi0JuYIdFjlvm1WIxp0X6YNBe24mQke1TZam+8jkjVnVvh/z9oNqrTa4s6O6hHfbBS4Hz3IqXGUg3sHE3vB7tbw1IcaF0/ps6z7LCLT6vwUqtNowoUbfMrnUxvwx7A01zoFy5MkxOWo1BANoPhW2o3bDOcNXlFBCXJrPqDOjov0YcHN5dkbXf5TkkKR4PF7SmbC1UaE10pLcFI2DvV9uOT9HF3Y6SGIYHqZdC5txxWPbxtDTL+JnhG94mAsxB1+grRjsIKcybk2gGITJSqXSgMzODsRwxI+BUcmz/ehA0I7WMs3mBCkId5T25sWwIDAQAB";
     private static final String PRIVATE_KEY_B64 = "MIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQDRvx46JHoQUeUB0/Fps9osnUJryaLQm5gh0WOW+bVYjGnRfpg0F7biZCR7VNlqb7yOSNWdW+H/P2g2qtNrizo7qEd9sFLgfPcipcZSDewcTe8Hu1vDUhxoXT+mzrPssItPq/BSq02jChRt8yudTG/DHsDTXOgXLkyTE5ajUEA2g+FbajdsM5w1eUUEJcms+oM6Oi/Rhwc3l2Rtd/lOSQpHg8XtKZsLVRoTXSktwUjYO9X245P0cXdjpIYhgepl0Lm3HFY9vG0NMv4meEb3iYCzEHX6CtGOwgpzJuTaAYhMlKpdKAzM4OxHDEj4FRybP96EDQjtYyzeYEKQh3lPbmxbAgMBAAECggEBAKLqJ7hRjN4QPihlTyYjJFty6px+SZBuyoO59/jUjB7zMV4fTmln4g2Gay/Af/9EOtjpicJoE+oGfhO4K+9kfR7JXn4p7rWfWvX2fUxOtA5oGjmPNX9Iz/fgNgiClQ5LMmn3yvrrQ6pXsfaU4lOTg1uzD2MczsjylVfH50GCm926uJULgP/hUow1FB31E5qD0hGHlKhoSANPRo4gF8QccjukNoFKdv1gQta5iLvweUPJYS0rVM455naOCP1Md1L4rSaP205M6TFOe5fxElLiOycadpKrDuDF6+mb6M+3IMlwRzmZ0PeStSKJsKOdYsHGzn5Q+De/DHI8bnn2j5LqL8ECgYEA/C7v6rRAX9zqxvW6WNacDSAwl/DlWNlFMwdPvf4NF7NbVpmtcXxvIQbMiK122TJaPdTREOq2OzQpNkwnUMC179/TjA31wzhNXpbtcuHWzRziSyR0SGiIYr221LMINOV0lsXr037T3ARw3pbDo+p4EfpCuC+zu3lDWkUJObNa+B0CgYEA1OvDXzViOamq2tFCmMpXo5PvFs+1g4Cu63KYiA5aK6sZLQkMwcJHdJF4sPgOn9NAE19x0B2nLPmrB636n0fD2F5mgyUnTf1VFUoJgm7UoKFggo5JpLrHsV3uyJm3tDMZZQMX9hwF/8dXH/ahn3qemXUSvc7T/kh2gHZvrTIifNcCgYBTXazgOOBDEIPoa9lDfwatbCPERtV6jrDKkrMwyqhHWnpqYXkt2AXgtB+vWzC70mJ0qELIxd6iKbcqBPjGQD6k4qhLV14UQCuLhndOkAvzWIYScyWhvjS/95lWLS0cV3I4WYuBKh8dT7aETvCz4lH5F3Mw8kwHQKocUFAhbAI5nQKBgGMgS/nUUaGE0w1CZR3a/ggixCm7k8bgLw9gb5DQFbzE0Fi+INlICJpFa4oAQla4M9mREtyQIZd3uN8/aTGkaJIgCNu/fVf6vBTIPjsiPA14dAT0F2cAqh1yHMv5fKQBMi5rzUj/7O8SsAYqfT5RCOtqrMn/M4Tr2XefLAjXEWVLAoGABvKTjzYlGSosaxKtcXrUyElU5fJfbHMlcEiLv5yjANfKRMKllnJ6899LCgGUo6qvk+G+YILEKzm25Rygq2XApk1BasCYfxxO0deRO6T9J4tXfOWNc/m4fBZ/qvHwOe4QImJTGXCCV7SUGoo8/wke/OYGxyt7oF84dAVeRT+dVlA=";
-
-    public static void main(String[] args) {
-
-        try {
-            String resultStr = new RadioMessage()
-                    .put("reason","this is a test")
-                    .sendE("192.168.1.212",25590).get();
-
-            RadioMessage result = new RadioMessage(resultStr);
-            System.out.println(result);
-
-
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        } catch (ExecutionException e) {
-            e.printStackTrace();
-        }
-    }
 
     public static String genAESKey() {
         try {
