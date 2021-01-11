@@ -8,6 +8,19 @@
     <artifactId>radio-scanner</artifactId>
     <version>2.1</version>
 
+
+    <distributionManagement>
+        <repository>
+            <id>umbcraft-repo</id>
+            <url>http://192.168.1.22:27018/repository/umbcraft-repo/</url>
+        </repository>
+        <snapshotRepository>
+            <id>umbcraft-repo</id>
+            <url>http://192.168.1.22:27018/repository/umbcraft-repo/</url>
+        </snapshotRepository>
+
+    </distributionManagement>
+
     <name>RadioScanner</name>
 
     <description>A Java networking solution</description>

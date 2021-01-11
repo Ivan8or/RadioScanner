@@ -3,7 +3,6 @@ import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-
 /*
 WalkieTalkie CLass
 
@@ -13,11 +12,10 @@ Also owns the ExecutorService which the other network-related classes use to run
 
 public class WalkieTalkie {
 
-    private static ExecutorService executor;
+    private static ExecutorService executor = Executors.newCachedThreadPool();;
     private Map<Integer, PortListener> scanners;
 
     public WalkieTalkie() {
-        executor = Executors.newCachedThreadPool();
         scanners = new HashMap<Integer, PortListener>(2);
     }
 

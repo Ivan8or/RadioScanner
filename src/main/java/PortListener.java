@@ -104,9 +104,9 @@ public class PortListener extends Thread{
                         RadioMessage response = respond(message);
 
                         String newKey_b64 = MessageEncryptor.genAESKey();
-                        String encryptedResponse = MessageEncryptor.encryptAES(message.toString(), newKey_b64);
+                        String encryptedResponse = MessageEncryptor.encryptAES(response.toString(), newKey_b64);
                         String newEncryptedKey = MessageEncryptor.encryptRSA(newKey_b64);
-                        String newSignature = MessageEncryptor.generateSignature(message.toString());
+                        String newSignature = MessageEncryptor.generateSignature(response.toString());
 
                         oos.writeUTF(newEncryptedKey);
                         oos.writeUTF(newSignature);

@@ -31,11 +31,6 @@ public class RadioMessage {
         message = new JSONObject(json);
     }
 
-    public RadioMessage(byte[] encrypted_json) {
-        //String plain_json = new String(ByteEncryptor.decryptRSA(encrypted_json));
-        //message = new JSONObject(plain_json);
-    }
-
     // empties the object
     public RadioMessage clear() {
         message = new JSONObject();
@@ -159,8 +154,8 @@ public class RadioMessage {
     }
 
     //alias for send()
-    public Future<String> send(String IP, String port) {
-        return send(IP, Integer.parseInt(port));
+    public Future<String> sendE(String IP, String port) {
+        return sendE(IP, Integer.parseInt(port));
     }
 
     //alias for send()
