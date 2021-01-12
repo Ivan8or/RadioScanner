@@ -47,9 +47,17 @@ public class RadioMessage {
         return this;
     }
 
+    // sets the RSA keys that will be used for encryption when this message is sent
     public synchronized RadioMessage setRSAKeys(String public_key, String private_key) {
         RSA_PUBLIC_KEY = public_key;
         RSA_PRIVATE_KEY = private_key;
+        return this;
+    }
+
+    // alias for setRSAKeys
+    public synchronized RadioMessage setRSAKeys(String[] keys) {
+        RSA_PUBLIC_KEY = keys[0];
+        RSA_PRIVATE_KEY = keys[1];
         return this;
     }
 
