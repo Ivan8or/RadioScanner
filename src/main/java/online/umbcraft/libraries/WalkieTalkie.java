@@ -20,7 +20,7 @@ public class WalkieTalkie {
     private static String RSA_PRIVATE_B64;
 
     public WalkieTalkie(String pub_key_b64, String priv_key_b64) {
-        scanners = new HashMap<Integer, PortListener>(2);
+        scanners = new HashMap<>(2);
         RSA_PUBLIC_B64 = pub_key_b64;
         RSA_PRIVATE_B64 = priv_key_b64;
     }

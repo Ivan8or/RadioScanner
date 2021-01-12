@@ -27,10 +27,10 @@ public class PortListener extends Thread{
     private Map<String, ReasonResponder> responders;
 
     public PortListener(int port, String pub_key_b64, String priv_key_b64) {
-        responders = new HashMap<String, ReasonResponder>(5);
+        responders = new HashMap<>(5);
         this.port = port;
-        RSA_PRIVATE_KEY = pub_key_b64;
-        RSA_PUBLIC_KEY = priv_key_b64;
+        RSA_PUBLIC_KEY = pub_key_b64;
+        RSA_PRIVATE_KEY = priv_key_b64;
     }
 
     public void setPort(int port) {

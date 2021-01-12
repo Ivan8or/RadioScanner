@@ -21,40 +21,6 @@ public class MessageEncryptor {
         this.PRIVATE_KEY_B64 = priv_key_b64;
     }
 
-    public static void main(String[] args) {
-        String[] pair_b64 = genRSAKeyPair();
-        //System.out.println(pair_b64[0]);
-        //System.out.println(pair_b64[1]);
-
-        WalkieTalkie talkie = new WalkieTalkie(pair_b64[0], pair_b64[1]);
-        talkie.addResponse(25003,
-                new ReasonResponder("ping") {
-                    @Override
-                    public RadioMessage response(RadioMessage message) {
-                        return new RadioMessage()
-                                .put("success","true");
-                    }
-                });
-
-
-        try {
-            //Thread.sleep(2000);
-            //.exit(-1);
-            RadioMessage result = new RadioMessage()
-                    .put("reason", "ping")
-                    .setKeys(pair_b64[0], pair_b64[1])
-                    .sendE("127.0.0.1",25003).get();
-
-            System.out.println(result);
-
-        }catch(Exception e) {
-            e.printStackTrace();
-        }
-
-
-
-    }
-
     public static String[] genRSAKeyPair() {
         try {
             KeyPairGenerator generator = KeyPairGenerator.getInstance("RSA");

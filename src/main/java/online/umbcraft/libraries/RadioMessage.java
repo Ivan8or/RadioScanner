@@ -47,7 +47,7 @@ public class RadioMessage {
         return this;
     }
 
-    public RadioMessage setKeys(String public_key, String private_key) {
+    public synchronized RadioMessage setRSAKeys(String public_key, String private_key) {
         RSA_PUBLIC_KEY = public_key;
         RSA_PRIVATE_KEY = private_key;
         return this;
