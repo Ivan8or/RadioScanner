@@ -9,6 +9,11 @@
     <remote-repository>
       <option name="id" value="umbcraft-repo" />
       <option name="name" value="umbcraft-repo" />
+      <option name="url" value="http://umbcraft.online:27018/repository/umbcraft-repo/" />
+    </remote-repository>
+    <remote-repository>
+      <option name="id" value="umbcraft-repo" />
+      <option name="name" value="umbcraft-repo" />
       <option name="url" value="http://192.168.1.22:27018/repository/umbcraft-repo/" />
     </remote-repository>
     <remote-repository>

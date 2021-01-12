@@ -5,15 +5,8 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>online.umbcraft</groupId>
-    <artifactId>radio-scanner</artifactId>
-    <version>2.3.3</version>
-
-    <repositories>
-        <repository>
-            <id>umbcraft-repo</id>
-            <url>http://192.168.1.22:27018/repository/umbcraft-repo/</url>
-        </repository>
-    </repositories>
+    <artifactId>RadioScanner</artifactId>
+    <version>2.3.4</version>
 
     <name>RadioScanner</name>
     <description>A Java networking solution</description>
@@ -26,6 +19,7 @@
     <url>umbcraft.online</url>
 
     <build>
+        <defaultGoal>clean deploy</defaultGoal>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -52,7 +46,20 @@
                     </execution>
                 </executions>
             </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-deploy-plugin</artifactId>
+            </plugin>
+
         </plugins>
+
+        <resources>
+            <resource>
+                <directory>src/main/resources</directory>
+                <filtering>true</filtering>
+            </resource>
+        </resources>
 
         <pluginManagement>
             <plugins>
@@ -63,25 +70,36 @@
                 </plugin>
             </plugins>
         </pluginManagement>
-
-        <resources>
-            <resource>
-                <directory>src/main/resources</directory>
-                <filtering>true</filtering>
-            </resource>
-        </resources>
     </build>
 
+    <distributionManagement>
+        <repository>
+            <id>umbcraft-releases-pub</id>
+            <url>http://umbcraft.online:27018/repository/umbcraft-pub/</url>
+        </repository>
+    </distributionManagement>
+
+    <repositories>
+        <repository>
+            <id>umbcraft-repo</id>
+            <url>http://umbcraft.online:27018/repository/umbcraft-repo/</url>
+        </repository>
+    </repositories>
+
+
     <dependencies>
+
         <dependency>
             <groupId>commons-codec</groupId>
             <artifactId>commons-codec</artifactId>
             <version>1.14</version>
         </dependency>
+
         <dependency>
             <groupId>com.konghq</groupId>
             <artifactId>unirest-java</artifactId>
             <version>3.11.02</version>
         </dependency>
+
     </dependencies>
 </project>
