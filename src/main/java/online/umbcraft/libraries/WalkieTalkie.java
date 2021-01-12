@@ -14,11 +14,15 @@ Also owns the ExecutorService which the other network-related classes use to run
 
 public class WalkieTalkie {
 
-    private static ExecutorService executor = Executors.newCachedThreadPool();;
+    private static ExecutorService executor = Executors.newCachedThreadPool();
     private Map<Integer, PortListener> scanners;
+    private static String RSA_PUBLIC_B64;
+    private static String RSA_PRIVATE_B64;
 
-    public WalkieTalkie() {
+    public WalkieTalkie(String pub_key_b64, String priv_key_b64) {
         scanners = new HashMap<Integer, PortListener>(2);
+        RSA_PUBLIC_B64 = pub_key_b64;
+        RSA_PRIVATE_B64 = priv_key_b64;
     }
 
     // halts any listening serversockets
@@ -36,11 +40,10 @@ public class WalkieTalkie {
 
     public void addResponse(int port, ReasonResponder responder) {
         if(scanners.get(port) == null) {
-            PortListener listener = new PortListener(port);
+            PortListener listener = new PortListener(port, RSA_PUBLIC_B64, RSA_PRIVATE_B64);
             listener.start();
             scanners.put(port, listener);
         }
-
         scanners.get(port).addResponder(responder);
     }
 }

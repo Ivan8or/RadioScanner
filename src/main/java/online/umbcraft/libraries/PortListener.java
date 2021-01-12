@@ -18,14 +18,19 @@ can contain multiple responders, one for any unique message reason
 
 public class PortListener extends Thread{
 
+    private String RSA_PRIVATE_KEY;
+    private String RSA_PUBLIC_KEY;
+
     private int port;
     private boolean running;
     private ServerSocket server_listener;
     private Map<String, ReasonResponder> responders;
 
-    public PortListener(int port) {
+    public PortListener(int port, String pub_key_b64, String priv_key_b64) {
         responders = new HashMap<String, ReasonResponder>(5);
         this.port = port;
+        RSA_PRIVATE_KEY = pub_key_b64;
+        RSA_PUBLIC_KEY = priv_key_b64;
     }
 
     public void setPort(int port) {
@@ -93,10 +98,12 @@ public class PortListener extends Thread{
                         String msgSignature = ois.readUTF();
                         String encryptedMessage = ois.readUTF();
 
-                        String AESKey = MessageEncryptor.decryptRSA(encryptedKey);
-                        String resultBody = MessageEncryptor.decryptAES(encryptedMessage, AESKey);
+                        MessageEncryptor encryptor = new MessageEncryptor(RSA_PUBLIC_KEY, RSA_PRIVATE_KEY);
 
-                        boolean validSignature = MessageEncryptor.verifySignature(resultBody, msgSignature);
+                        String AESKey = encryptor.decryptRSA(encryptedKey);
+                        String resultBody = encryptor.decryptAES(encryptedMessage, AESKey);
+                        boolean validSignature = encryptor.verifySignature(resultBody, msgSignature);
+
                         if(!validSignature) {
                             System.err.println("INVALID SIGNATURE");
                             return;
@@ -106,9 +113,9 @@ public class PortListener extends Thread{
                         RadioMessage response = respond(message);
 
                         String newKey_b64 = MessageEncryptor.genAESKey();
-                        String encryptedResponse = MessageEncryptor.encryptAES(response.toString(), newKey_b64);
-                        String newEncryptedKey = MessageEncryptor.encryptRSA(newKey_b64);
-                        String newSignature = MessageEncryptor.generateSignature(response.toString());
+                        String encryptedResponse = encryptor.encryptAES(response.toString(), newKey_b64);
+                        String newEncryptedKey = encryptor.encryptRSA(newKey_b64);
+                        String newSignature = encryptor.generateSignature(response.toString());
 
                         oos.writeUTF(newEncryptedKey);
                         oos.writeUTF(newSignature);

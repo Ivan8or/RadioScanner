@@ -24,6 +24,8 @@ Represents a single JSON-based text message that can be sent over the network
 public class RadioMessage {
 
     private JSONObject message;
+    private String RSA_PRIVATE_KEY;
+    private String RSA_PUBLIC_KEY;
 
     public RadioMessage() {
         message = new JSONObject();
@@ -42,6 +44,12 @@ public class RadioMessage {
     // adds a new key/value pair to the JSON object
     public RadioMessage put(String key, String val) {
         message.put(key, val);
+        return this;
+    }
+
+    public RadioMessage setKeys(String public_key, String private_key) {
+        RSA_PUBLIC_KEY = public_key;
+        RSA_PRIVATE_KEY = private_key;
         return this;
     }
 
@@ -94,27 +102,6 @@ public class RadioMessage {
         return this;
     }
 
-    // sends itself to a certain IP and port
-    // can throw an error if the address is unavailable
-    @Deprecated
-    public Future<String> send(String IP, int port) {
-
-        return WalkieTalkie.sharedExecutor().submit(() -> {
-            Socket socket = new Socket(IP, port);
-
-            ObjectOutputStream oos = new ObjectOutputStream(socket.getOutputStream());
-            ObjectInputStream ois = new ObjectInputStream(socket.getInputStream());
-            oos.writeUTF(message.toString());
-            oos.flush();
-
-            String response = ois.readUTF();
-
-            ois.close();
-            oos.close();
-            socket.close();
-            return response;
-        });
-    }
     // encrypts and sends itself to a certain IP and port
     // can throw an error if the address is unavailable
     public Future<String> sendE(String IP, int port) {
@@ -125,10 +112,12 @@ public class RadioMessage {
             ObjectOutputStream oos = new ObjectOutputStream(socket.getOutputStream());
             ObjectInputStream ois = new ObjectInputStream(socket.getInputStream());
 
+            MessageEncryptor encryptor = new MessageEncryptor(RSA_PUBLIC_KEY, RSA_PRIVATE_KEY);
+
             String AESKey = MessageEncryptor.genAESKey();
-            String encryptedMessage = MessageEncryptor.encryptAES(message.toString(),AESKey);
-            String encryptedKey = MessageEncryptor.encryptRSA(AESKey);
-            String signature = MessageEncryptor.generateSignature(message.toString());
+            String encryptedMessage = encryptor.encryptAES(message.toString(),AESKey);
+            String encryptedKey = encryptor.encryptRSA(AESKey);
+            String signature = encryptor.generateSignature(message.toString());
 
             oos.writeUTF(encryptedKey);
             oos.writeUTF(signature);
@@ -140,9 +129,10 @@ public class RadioMessage {
             String responseSignature = ois.readUTF();
             String responseBody_b64 = ois.readUTF();
 
-            String resultAESKey = MessageEncryptor.decryptRSA(responseKey_b64);
-            String resultBody = MessageEncryptor.decryptAES(responseBody_b64, resultAESKey);
-            boolean validSignature = MessageEncryptor.verifySignature(resultBody, responseSignature);
+            String resultAESKey = encryptor.decryptRSA(responseKey_b64);
+            String resultBody = encryptor.decryptAES(responseBody_b64, resultAESKey);
+            boolean validSignature = encryptor.verifySignature(resultBody, responseSignature);
+
             if(!validSignature) {
                 System.err.println("INVALID SIGNATURE!");
                 return null;
@@ -155,13 +145,19 @@ public class RadioMessage {
         });
     }
 
-    //alias for send()
+    //alias for sendE()
     public Future<String> sendE(String IP, String port) {
-        return sendE(IP, Integer.parseInt(port));
+        int port_num = 0;
+        try {
+            port_num = Integer.parseInt(port);
+        } catch (NumberFormatException e) {
+            throw new IllegalArgumentException("Invalid address format");
+        }
+        return sendE(IP, port_num);
     }
 
-    //alias for send()
-    public Future<String> send(String address) {
+    //alias for sendE()
+    public Future<String> sendE(String address) {
 
         String[] split = address.split(":");
 
@@ -176,6 +172,6 @@ public class RadioMessage {
             throw new IllegalArgumentException("Invalid address format");
         }
 
-        return send(ip, port);
+        return sendE(ip, port);
     }
 }
