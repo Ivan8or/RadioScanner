@@ -104,7 +104,7 @@ public class RadioMessage {
 
     // encrypts and sends itself to a certain IP and port
     // can throw an error if the address is unavailable
-    public Future<String> sendE(String IP, int port) {
+    public Future<RadioMessage> sendE(String IP, int port) {
 
         return WalkieTalkie.sharedExecutor().submit(() -> {
             Socket socket = new Socket(IP, port);
@@ -141,12 +141,12 @@ public class RadioMessage {
             ois.close();
             oos.close();
             socket.close();
-            return resultBody;
+            return new RadioMessage(resultBody);
         });
     }
 
     //alias for sendE()
-    public Future<String> sendE(String IP, String port) {
+    public Future<RadioMessage> sendE(String IP, String port) {
         int port_num = 0;
         try {
             port_num = Integer.parseInt(port);
@@ -157,7 +157,7 @@ public class RadioMessage {
     }
 
     //alias for sendE()
-    public Future<String> sendE(String address) {
+    public Future<RadioMessage> sendE(String address) {
 
         String[] split = address.split(":");
 
