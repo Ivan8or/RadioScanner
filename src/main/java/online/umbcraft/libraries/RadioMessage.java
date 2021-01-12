@@ -123,8 +123,11 @@ public class RadioMessage {
             MessageEncryptor encryptor = new MessageEncryptor(RSA_PUBLIC_KEY, RSA_PRIVATE_KEY);
 
             String AESKey = MessageEncryptor.genAESKey();
+
             String encryptedMessage = encryptor.encryptAES(message.toString(),AESKey);
+
             String encryptedKey = encryptor.encryptRSA(AESKey);
+
             String signature = encryptor.generateSignature(message.toString());
 
             oos.writeUTF(encryptedKey);
@@ -138,17 +141,19 @@ public class RadioMessage {
             String responseBody_b64 = ois.readUTF();
 
             String resultAESKey = encryptor.decryptRSA(responseKey_b64);
+
             String resultBody = encryptor.decryptAES(responseBody_b64, resultAESKey);
+
             boolean validSignature = encryptor.verifySignature(resultBody, responseSignature);
 
             if(!validSignature) {
-                System.err.println("INVALID SIGNATURE!");
                 return null;
             }
 
             ois.close();
             oos.close();
             socket.close();
+
             return new RadioMessage(resultBody);
         });
     }

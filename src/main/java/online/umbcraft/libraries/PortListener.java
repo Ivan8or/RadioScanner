@@ -91,6 +91,7 @@ public class PortListener extends Thread{
                 clientSocket.setSoTimeout(3000);
                 WalkieTalkie.sharedExecutor().submit(() -> {
                     try {
+
                         ObjectInputStream ois = new ObjectInputStream(clientSocket.getInputStream());
                         ObjectOutputStream oos = new ObjectOutputStream(clientSocket.getOutputStream());
 
@@ -101,11 +102,12 @@ public class PortListener extends Thread{
                         MessageEncryptor encryptor = new MessageEncryptor(RSA_PUBLIC_KEY, RSA_PRIVATE_KEY);
 
                         String AESKey = encryptor.decryptRSA(encryptedKey);
+
                         String resultBody = encryptor.decryptAES(encryptedMessage, AESKey);
+
                         boolean validSignature = encryptor.verifySignature(resultBody, msgSignature);
 
                         if(!validSignature) {
-                            System.err.println("INVALID SIGNATURE");
                             return;
                         }
 
@@ -113,8 +115,11 @@ public class PortListener extends Thread{
                         RadioMessage response = respond(message);
 
                         String newKey_b64 = MessageEncryptor.genAESKey();
+
                         String encryptedResponse = encryptor.encryptAES(response.toString(), newKey_b64);
+
                         String newEncryptedKey = encryptor.encryptRSA(newKey_b64);
+
                         String newSignature = encryptor.generateSignature(response.toString());
 
                         oos.writeUTF(newEncryptedKey);

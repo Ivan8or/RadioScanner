@@ -13,8 +13,8 @@ import javax.crypto.spec.SecretKeySpec;
 
 public class MessageEncryptor {
 
-    private String PUBLIC_KEY_B64;
-    private String PRIVATE_KEY_B64;
+    private final String PUBLIC_KEY_B64;
+    private final String PRIVATE_KEY_B64;
 
     public MessageEncryptor(String pub_key_b64, String priv_key_b64) {
         this.PUBLIC_KEY_B64 = pub_key_b64;
