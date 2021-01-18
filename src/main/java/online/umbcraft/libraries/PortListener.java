@@ -100,11 +100,8 @@ public class PortListener extends Thread{
                         String encryptedMessage = ois.readUTF();
 
                         MessageEncryptor encryptor = new MessageEncryptor(RSA_PUBLIC_KEY, RSA_PRIVATE_KEY);
-
                         String AESKey = encryptor.decryptRSA(encryptedKey);
-
                         String resultBody = encryptor.decryptAES(encryptedMessage, AESKey);
-
                         boolean validSignature = encryptor.verifySignature(resultBody, msgSignature);
 
                         if(!validSignature) {
@@ -115,11 +112,8 @@ public class PortListener extends Thread{
                         RadioMessage response = respond(message);
 
                         String newKey_b64 = MessageEncryptor.genAESKey();
-
                         String encryptedResponse = encryptor.encryptAES(response.toString(), newKey_b64);
-
                         String newEncryptedKey = encryptor.encryptRSA(newKey_b64);
-
                         String newSignature = encryptor.generateSignature(response.toString());
 
                         oos.writeUTF(newEncryptedKey);
