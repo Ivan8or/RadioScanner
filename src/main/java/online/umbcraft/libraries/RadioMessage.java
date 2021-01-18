@@ -114,6 +114,8 @@ public class RadioMessage {
     // can throw an error if the address is unavailable
     public Future<RadioMessage> sendE(String IP, int port) {
 
+        System.out.println("sending message to IP "+IP+" and port "+port);
+
         return WalkieTalkie.sharedExecutor().submit(() -> {
             Socket socket = new Socket(IP, port);
 
@@ -122,7 +124,7 @@ public class RadioMessage {
 
             MessageEncryptor encryptor = new MessageEncryptor(RSA_PUBLIC_KEY, RSA_PRIVATE_KEY);
             String AESKey = MessageEncryptor.genAESKey();
-            String encryptedMessage = encryptor.encryptAES(message.toString(),AESKey);
+            String encryptedMessage = encryptor.encryptAES(message.toString(), AESKey);
             String encryptedKey = encryptor.encryptRSA(AESKey);
             String signature = encryptor.generateSignature(message.toString());
 
@@ -132,16 +134,39 @@ public class RadioMessage {
 
             oos.flush();
 
-            String responseKey_b64 = ois.readUTF();
-            String responseSignature = ois.readUTF();
-            String responseBody_b64 = ois.readUTF();
+            String responseKey_b64 = null;
+            String responseSignature = null;
+            String responseBody_b64 = null;
+            try {
+                responseKey_b64 = ois.readUTF();
+                responseSignature = ois.readUTF();
+                responseBody_b64 = ois.readUTF();
+            } catch (Exception e) {
+                System.err.println("BAD RESPONSE FORMAT");
+                return new RadioMessage()
+                        .put("success","false")
+                        .put("reason","BAD RESPONSE FORMAT");
+            }
 
-            String resultAESKey = encryptor.decryptRSA(responseKey_b64);
-            String resultBody = encryptor.decryptAES(responseBody_b64, resultAESKey);
-            boolean validSignature = encryptor.verifySignature(resultBody, responseSignature);
+            String resultAESKey = null;
+            String resultBody = null;
+            boolean validSignature = false;
+            try {
+                resultAESKey = encryptor.decryptRSA(responseKey_b64);
+                resultBody = encryptor.decryptAES(responseBody_b64, resultAESKey);
+                validSignature = encryptor.verifySignature(resultBody, responseSignature);
+            } catch (Exception e) {
+                System.err.println("BAD KEY - DECRYPTION FAILED!");
+                return new RadioMessage()
+                        .put("success","false")
+                        .put("reason","BAD KEY - DECRYPTION FAILED");
+            }
 
-            if(!validSignature) {
-                return null;
+            if (!validSignature) {
+                System.err.println("SIGNATURE INVALID - IGNORING MESSAGE RESPONSE!");
+                return new RadioMessage()
+                        .put("success","false")
+                        .put("reason","SIGNATURE INVALID - IGNORE MESSAGE RESPONSE!");
             }
 
             ois.close();
