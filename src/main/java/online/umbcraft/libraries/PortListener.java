@@ -16,7 +16,7 @@ A message listener for a single port
 can contain multiple responders, one for any unique message reason
  */
 
-public class PortListener extends Thread{
+public class PortListener extends Thread {
 
     private String RSA_PRIVATE_KEY;
     private String RSA_PUBLIC_KEY;
@@ -33,11 +33,12 @@ public class PortListener extends Thread{
         RSA_PRIVATE_KEY = priv_key_b64;
     }
 
-    public void setPort(int port) {
-        this.port = port;
-    }
     public int getPort() {
         return port;
+    }
+
+    public void setPort(int port) {
+        this.port = port;
     }
 
     // adds a new response for a certain RadioMessage reason
@@ -52,7 +53,7 @@ public class PortListener extends Thread{
 
     public void stopListening() {
         running = false;
-        if(server_listener != null){
+        if (server_listener != null) {
             try {
                 server_listener.close();
             } catch (IOException e) {
@@ -64,10 +65,10 @@ public class PortListener extends Thread{
     private RadioMessage respond(RadioMessage message) {
         ReasonResponder responder = responders.get(message.get("reason"));
         RadioMessage response;
-        if(responder == null)
+        if (responder == null)
             response = new RadioMessage()
-                    .put("success","false")
-                    .put("reason","invalid_reason");
+                    .put("success", "false")
+                    .put("reason", "invalid_reason");
         else
             response = responder.response(message);
 
@@ -81,13 +82,14 @@ public class PortListener extends Thread{
         running = true;
         try {
             server_listener = new ServerSocket(port);
-        } catch(IOException e) {
+        } catch (IOException e) {
             e.printStackTrace();
         }
 
-        while(running) {
+        while (running) {
             try {
                 Socket clientSocket = server_listener.accept();
+                System.out.println("receiving message from IP " + clientSocket.getInetAddress());
                 clientSocket.setSoTimeout(3000);
                 WalkieTalkie.sharedExecutor().submit(() -> {
                     try {
@@ -95,16 +97,34 @@ public class PortListener extends Thread{
                         ObjectInputStream ois = new ObjectInputStream(clientSocket.getInputStream());
                         ObjectOutputStream oos = new ObjectOutputStream(clientSocket.getOutputStream());
 
-                        String encryptedKey = ois.readUTF();
-                        String msgSignature = ois.readUTF();
-                        String encryptedMessage = ois.readUTF();
+                        String encryptedKey = null;
+                        String msgSignature = null;
+                        String encryptedMessage = null;
+                        try {
+                            encryptedKey = ois.readUTF();
+                            msgSignature = ois.readUTF();
+                            encryptedMessage = ois.readUTF();
+                        } catch (Exception e) {
+                            System.err.println("BAD MESSAGE FORMAT");
+                            return;
+                        }
 
-                        MessageEncryptor encryptor = new MessageEncryptor(RSA_PUBLIC_KEY, RSA_PRIVATE_KEY);
-                        String AESKey = encryptor.decryptRSA(encryptedKey);
-                        String resultBody = encryptor.decryptAES(encryptedMessage, AESKey);
-                        boolean validSignature = encryptor.verifySignature(resultBody, msgSignature);
 
-                        if(!validSignature) {
+                        MessageEncryptor encryptor = null;
+                        String AESKey = null;
+                        String resultBody = null;
+                        boolean validSignature = false;
+                        try {
+                            encryptor = new MessageEncryptor(RSA_PUBLIC_KEY, RSA_PRIVATE_KEY);
+                            AESKey = encryptor.decryptRSA(encryptedKey);
+                            resultBody = encryptor.decryptAES(encryptedMessage, AESKey);
+                            validSignature = encryptor.verifySignature(resultBody, msgSignature);
+                        } catch (Exception e) {
+                            System.err.println("BAD KEY - DECRYPTION FAILED!");
+                        }
+
+                        if (!validSignature) {
+                            System.err.println("SIGNATURE INVALID - IGNORING MESSAGE!");
                             return;
                         }
 
@@ -129,10 +149,13 @@ public class PortListener extends Thread{
                         e.printStackTrace();
                     }
                 });
-
-            }catch(IOException e) {
+            } catch (IOException e) {
                 e.printStackTrace();
             }
         }
+    }
+
+    public void lore(String[] arr) {
+
     }
 }

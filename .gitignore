@@ -1,1 +1,6 @@
 /target/
+/.gradle/
+/.gitignore/
+/gradlew/
+/gradlew.bat/
+/pom.xml/
