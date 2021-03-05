@@ -1,26 +1,14 @@
 A simplified way to have event-based java networking!
 
 
-maven repo / dependencies (same information applies to gradle:
+maven repo / dependencies:
 =
 
+repo url http://192.168.1.22:27018/repository/umbcraft-repo/
 
-<repositories>
-  <repository>
-   <id>umbcraft-repo</id>
-   <url>http://192.168.1.22:27018/repository/umbcraft-repo/</url>
-  </repository>
-</repositories>
-
-...
-
-<dependencies>
-  <dependency>
-    <groupId>online.umbcraft.libraries</groupId>
-    <artifactId>RadioScanner</artifactId>
-   <version>2.3.5</version>
-  </dependency>
-<dependencies>
+dependency group id: online.umbcraft.libraries
+dependency artifact Id: RadioScanner
+dependency version: 2.3.5
 
 
 
