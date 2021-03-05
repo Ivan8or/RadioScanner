@@ -7,7 +7,9 @@ maven repo / dependencies:
 repo url http://192.168.1.22:27018/repository/umbcraft-repo/
 
 dependency group id: online.umbcraft.libraries
+
 dependency artifact Id: RadioScanner
+
 dependency version: 2.3.5
 
 
