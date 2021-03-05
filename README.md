@@ -2,7 +2,9 @@ A simplified way to have event-based java networking!
 
 
 ================================
+
 maven repo / dependencies (same information applies to gradle:
+
 ================================
 
 
@@ -27,7 +29,9 @@ maven repo / dependencies (same information applies to gradle:
 
 
 ================================
+
 BASIC DEMONSTRATION:
+
 ================================
 
 public static void main(String[] args) {
@@ -114,7 +118,9 @@ public static void main(String[] args) {
 
 
 ================================
+
 WALKTHROUGH (SENDING MESSAGES):
+
 ================================
 
 // 1.1 create a new RadioMessage object passing in an RSA keypair to the constructor 
@@ -182,7 +188,9 @@ String did_i_have_enough_dogs = my_response.get("enough_dogs");
 
 
 ================================
+
 WALKTHROUGH (RECEIVING / RESPONDING TO MESSAGES):
+
 ================================
 
 
