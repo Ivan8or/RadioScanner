@@ -17,6 +17,7 @@ dependency version: 2.3.5
 BASIC DEMONSTRATION:
 =
 
+{
 public static void main(String[] args) {
 
         // creating a new keypair... DO NOT DO THIS IN PRODUCTION!
@@ -101,12 +102,13 @@ public static void main(String[] args) {
         talkie.stopListening();
     }
 }
+}
 
 
 
 WALKTHROUGH (SENDING MESSAGES):
 =
-
+{
 // 1.1 create a new RadioMessage object passing in an RSA keypair to the constructor 
 
 RadioMessage message = new RadioMessage(String rsa_key_pub, String rsa_key_priv);
@@ -168,13 +170,14 @@ String did_i_have_enough_cats = my_response.get("enough_cats");
 String did_i_have_enough_dogs = my_response.get("enough_dogs");
 
 
-
+}
 
 
 
 WALKTHROUGH (RECEIVING / RESPONDING TO MESSAGES):
 =
 
+{
 
 // 2.1 create a WalkieTalkie object, with a constructor taking in your RSA public and private keys
 
@@ -247,11 +250,11 @@ public class MyVeryOwnReasonRR extends ReasonResponder {
 int WALKIE_PORT = 25540;
 walkie.addResponse(WALKIE_PORT,new MyVeryOwnReasonRR("my_very_own_reason", this));
 
+// that's it!
 
 
 
-and....... you're done!
-
+}
 
 
 
