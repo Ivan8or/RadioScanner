@@ -31,7 +31,7 @@ public static void main(String[] args) {
         // adding a response to the main object
         // also setting port on which this responder listens
         talkie.addResponse(25540,
-                new ReasonResponder("my_very_own_reason") {
+                new ReasonResponder("do_i_have_enough_animals") {
                     @Override
                     public RadioMessage response(RadioMessage message) {
                         RadioMessage toReturn = new RadioMessage();
@@ -64,11 +64,11 @@ public static void main(String[] args) {
                 }
         );
 
-        // sending a 'my_very_own_reason' message from a client
+        // sending a 'do_i_have_enough_animals' message from a client
         RadioMessage toSend = new RadioMessage();
 
         // setting reason (key val must be 'reason'), it's special!!!
-        toSend.put("reason","my_very_own_reason");
+        toSend.put("reason","do_i_have_enough_animals");
 
         // setting other relevant data
         toSend.put("cats_owned", "2");
@@ -122,7 +122,7 @@ RadioMessage message = new RadioMessage(String rsa_key_pub, String rsa_key_priv)
 // 1.2 set a reason for the message to be sent
 
 ```
-message.put("reason", "my_very_own_reason");
+message.put("reason", "do_i_have_enough_animals");
 ```
 
 
@@ -262,11 +262,11 @@ public class MyVeryOwnReasonRR extends ReasonResponder {
 
 // P.S. you also set the port on which the ReasonResponder is listening in this step
 
-// P.S. see comment 1.2 uses "my_very_own_reason" as the reason a request is being sent
+// P.S. see comment 1.2 uses "do_i_have_enough_animals" as the reason a request is being sent
 
 ```
 int WALKIE_PORT = 25540;
-walkie.addResponse(WALKIE_PORT,new MyVeryOwnReasonRR("my_very_own_reason", this));
+walkie.addResponse(WALKIE_PORT,new MyVeryOwnReasonRR("do_i_have_enough_animals", this));
 ```
 
 // that's it!
