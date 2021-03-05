@@ -19,6 +19,9 @@ BASIC DEMONSTRATION:
 
 public static void main(String[] args) {
 
+        // creating a new keypair... DO NOT DO THIS IN PRODUCTION!
+        // this is for test purposes, you would normally want to create a single keypair and store it
+        // instead of making a new one each time
         String[] keypair = MessageEncryptor.genRSAKeyPair();
 
         // creating the server side
