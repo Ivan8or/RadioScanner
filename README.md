@@ -4,7 +4,7 @@ A simplified way to have event-based java networking!
 maven repo / dependencies:
 =
 
-repo url http://192.168.1.22:27018/repository/umbcraft-repo/
+repo url http://192.168.1.22:27018/repository/umbcraft-pub/
 
 dependency group id: online.umbcraft.libraries
 
