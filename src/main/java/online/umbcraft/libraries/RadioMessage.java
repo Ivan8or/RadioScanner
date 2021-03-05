@@ -87,31 +87,10 @@ public class RadioMessage {
         return message.toString();
     }
 
-    @Deprecated
-    // returns the legacy string of the format used to send messages in v1.0 of the plugin
-    public String toLegacyString() {
-        String toReturn = "";
-
-        for (String key : message.toMap().keySet()) {
-            toReturn += key + "=" + message.getString(key).replaceAll(" ", "%@%") + " ";
-        }
-        return toReturn;
-    }
-
-    @Deprecated
-    // creates a json object from a legacy string
-    public RadioMessage fromLegacyString(String legacy_string) {
-        String[] items = legacy_string.split(" ");
-        for (String item : items) {
-            String[] pair = item.split("=");
-            if (pair.length == 2)
-                message.put(pair[0], pair[1].replaceAll("%@%", " "));
-        }
-        return this;
-    }
 
     // encrypts and sends itself to a certain IP and port
     // can throw an error if the address is unavailable
+    @Deprecated
     public Future<RadioMessage> sendE(String IP, int port) {
 
         System.out.println("sending message to IP "+IP+" and port "+port);
@@ -178,6 +157,7 @@ public class RadioMessage {
     }
 
     //alias for sendE()
+    @Deprecated
     public Future<RadioMessage> sendE(String IP, String port) {
         int port_num = 0;
         try {
@@ -189,6 +169,7 @@ public class RadioMessage {
     }
 
     //alias for sendE()
+    @Deprecated
     public Future<RadioMessage> sendE(String address) {
 
         String[] split = address.split(":");
@@ -206,4 +187,18 @@ public class RadioMessage {
 
         return sendE(ip, port);
     }
+
+
+    // aliases for sendE
+    public Future<RadioMessage> send(String ip, int port) {
+        return sendE(ip, port);
+    }
+    public Future<RadioMessage> send(String ip, String port) {
+        return sendE(ip, port);
+    }
+    public Future<RadioMessage> send(String full_address) {
+        return sendE(full_address);
+    }
+
+
 }

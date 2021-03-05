@@ -21,6 +21,7 @@ repositories {
 dependencies {
     implementation 'commons-codec:commons-codec:1.14'
     implementation 'com.konghq:unirest-java:3.11.02'
+
 }
 
 group = 'online.umbcraft.libraries'

@@ -150,12 +150,13 @@ public class PortListener extends Thread {
                     }
                 });
             } catch (IOException e) {
-                e.printStackTrace();
+                if(server_listener.isClosed())
+                    System.out.println("closed listener on port "+port);
+                else {
+                    e.printStackTrace();
+                    System.err.println("errored out - no longer listening on port " + port);
+                }
             }
         }
-    }
-
-    public void lore(String[] arr) {
-
     }
 }
