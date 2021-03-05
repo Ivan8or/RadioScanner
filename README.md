@@ -139,11 +139,17 @@ message.put("dogs_owned", "0");
 // 1.4 give the radio message your RSA keys so that it knows how to encrypt the message
 
 // P.S. the keypair i am using in this example is NOT a real key pair (intentionally) and should NOT be used
+
 // they are only here to get the point accross that you have to use the same keypair for 
+
 // both sending messages AND for receiving messages... common sense!
+
 // to generate a *REAL* keypair you can use 
+
 // 'String[] keypair = MessageEncryptor.genRSAKeyPair();' (index 0 is public, index 1 is private)
+
 // instead of the gibberish i'm using in this walkthrough
+
 
 ```
 String rsa_public_key = "AAAAADADKAWDADWD;NOTAREALKEY";
@@ -200,7 +206,6 @@ WalkieTalkie talkie = new WalkieTalkie(rsa_public_key, rsa_private_key);
 // 2.2 create some classes that extend ReasonResponder for every 'reason' a message would be sent:
 
 ```
-
 public class MyVeryOwnReasonRR extends ReasonResponder {
 
 
@@ -250,19 +255,18 @@ public class MyVeryOwnReasonRR extends ReasonResponder {
       return toReturn;
  }
 }
-
 ```
 
 
 // 2.7 after making your class that extends ReasonResponder, add an instance of it into your WalkieTalkie object:
+
 // P.S. you also set the port on which the ReasonResponder is listening in this step
+
 // P.S. see comment 1.2 uses "my_very_own_reason" as the reason a request is being sent
 
 ```
-
 int WALKIE_PORT = 25540;
 walkie.addResponse(WALKIE_PORT,new MyVeryOwnReasonRR("my_very_own_reason", this));
-
 ```
 
 // that's it!
