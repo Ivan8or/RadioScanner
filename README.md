@@ -18,6 +18,7 @@ BASIC DEMONSTRATION:
 =
 
 {
+
 public static void main(String[] args) {
 
         // creating a new keypair... DO NOT DO THIS IN PRODUCTION!
@@ -102,6 +103,7 @@ public static void main(String[] args) {
         talkie.stopListening();
     }
 }
+
 }
 
 
@@ -109,6 +111,7 @@ public static void main(String[] args) {
 WALKTHROUGH (SENDING MESSAGES):
 =
 {
+
 // 1.1 create a new RadioMessage object passing in an RSA keypair to the constructor 
 
 RadioMessage message = new RadioMessage(String rsa_key_pub, String rsa_key_priv);
