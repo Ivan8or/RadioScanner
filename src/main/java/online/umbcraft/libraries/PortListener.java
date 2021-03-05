@@ -68,16 +68,16 @@ public class PortListener extends Thread {
         if (responder == null)
             response = new RadioMessage()
                     .put("success", "false")
-                    .put("reason", "invalid_reason");
+                    .put("reason", "no_valid_reason");
         else
             response = responder.response(message);
 
         return response;
     }
 
-    @Override
     // starts a ServerSocket that continuously listens for radio messages, and automatically replies
     // to any that this has a set response for (or gives a generic response to any it doesnt have)
+    @Override
     public void run() {
         running = true;
         try {
@@ -151,10 +151,10 @@ public class PortListener extends Thread {
                 });
             } catch (IOException e) {
                 if(server_listener.isClosed())
-                    System.out.println("closed listener on port "+port);
+                    System.out.println("CLOSED LISTENER ON PORT "+port);
                 else {
                     e.printStackTrace();
-                    System.err.println("errored out - no longer listening on port " + port);
+                    System.err.println("ERRORED OUT - NO LONGER LISTENING ON PORT " + port);
                 }
             }
         }
