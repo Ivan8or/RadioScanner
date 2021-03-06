@@ -14,11 +14,12 @@ import org.apache.log4j.Logger;
 RadioMessage CLass
 
 Represents a single JSON-based text message that can be sent over the network
+
    - Messages are collections of string key-value pairs
    - the unspoken standard for messages is that:
-     - each request message must include a 'reason',
-     - each response message must include a 'success',
-     - and if the success is false then the 'reason' for that failure
+      - each request message must include a 'reason',
+      - each response message must include a 'success',
+      - and if the success is false then the 'reason' for that failure
    - RadioMessages can be combined with each other to merge their key-value pairs
    - RadioMessages can be sent, returning a Future containing the response from the receiver
  */

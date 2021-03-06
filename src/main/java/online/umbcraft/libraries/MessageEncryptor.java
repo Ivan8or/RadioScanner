@@ -1,7 +1,6 @@
 package online.umbcraft.libraries;
 
 import org.apache.commons.codec.binary.Base64;
-import org.apache.log4j.Logger;
 
 import java.security.*;
 import java.security.spec.PKCS8EncodedKeySpec;
@@ -11,6 +10,15 @@ import javax.crypto.Cipher;
 import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
+
+/*
+MessageEncryptor CLass
+
+A class to assist in encrypting strings via AES and via RSA, as well as creating RSA signatures
+can also generate RSA keypairs as an added benefit
+
+holds a single RSA keypair
+ */
 
 public class MessageEncryptor {
 

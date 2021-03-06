@@ -1,4 +1,6 @@
-package online.umbcraft.libraries;/*
+package online.umbcraft.libraries;
+
+/*
 ReasonResponder CLass
 
 An abstract class that can be extended to allow certain RadioMessage(s) to be responded to

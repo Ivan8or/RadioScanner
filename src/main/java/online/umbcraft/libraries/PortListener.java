@@ -11,8 +11,6 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.apache.log4j.Logger;
-
 /*
 PortListener CLass
 
@@ -26,7 +24,7 @@ public class PortListener extends Thread {
     private final String RSA_PRIVATE_KEY;
     private final String RSA_PUBLIC_KEY;
     private final int PORT;
-    private boolean running;
+
     private ServerSocket server_listener;
     private Map<String, ReasonResponder> responders;
     private WalkieTalkie talkie;
@@ -58,7 +56,6 @@ public class PortListener extends Thread {
         if (talkie.isDebugging())
             logger.debug("stopping listening on port " + PORT);
 
-        running = false;
         if (server_listener != null) {
             try {
                 server_listener.close();
@@ -92,15 +89,15 @@ public class PortListener extends Thread {
     // to any that this has a set response for (or gives a generic response to any it doesnt have)
     @Override
     public void run() {
-        running = true;
+
         try {
             server_listener = new ServerSocket(PORT);
         } catch (IOException e) {
             e.printStackTrace();
         }
 
-        while (running) {
-            System.out.println("test");
+        while (!server_listener.isClosed()) {
+
             try {
                 Socket clientSocket = server_listener.accept();
 
