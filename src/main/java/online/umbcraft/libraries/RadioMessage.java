@@ -31,7 +31,7 @@ public class RadioMessage {
     private String RSA_PRIVATE_KEY;
     private String RSA_PUBLIC_KEY;
 
-    private static final Logger logger = Logger.getLogger(RadioMessage.class);
+    private static final Logger logger = Logger.getLogger(RadioMessage.class.getSimpleName());
     private boolean debug;
 
     public RadioMessage() {

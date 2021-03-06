@@ -20,7 +20,7 @@ can contain multiple responders, one for any unique message reason
 
 public class PortListener extends Thread {
 
-    private static final Logger logger = Logger.getLogger(PortListener.class);
+    private static final Logger logger = Logger.getLogger(PortListener.class.getSimpleName());
     private final String RSA_PRIVATE_KEY;
     private final String RSA_PUBLIC_KEY;
     private final int PORT;
@@ -57,11 +57,12 @@ public class PortListener extends Thread {
             logger.debug("stopping listening on port " + PORT);
 
         if (server_listener != null) {
+
             try {
                 server_listener.close();
-            } catch (IOException e) {
-                e.printStackTrace();
+            } catch (IOException ignored) {
             }
+            super.interrupt();
         }
     }
 
@@ -96,8 +97,8 @@ public class PortListener extends Thread {
             e.printStackTrace();
         }
 
-        while (!server_listener.isClosed()) {
-
+        while (true) {
+            logger.debug("while loop :)");
             try {
                 Socket clientSocket = server_listener.accept();
 
@@ -105,6 +106,7 @@ public class PortListener extends Thread {
                     logger.debug("receiving message from IP " + clientSocket.getInetAddress());
 
                 clientSocket.setSoTimeout(3000);
+
                 WalkieTalkie.sharedExecutor().submit(() -> {
 
                     ObjectInputStream ois = null;
@@ -117,10 +119,10 @@ public class PortListener extends Thread {
                         logger.error("FAILED TO OPEN INPUT STREAMS");
                         return;
                     }
-
                     String encryptedKey = null;
                     String msgSignature = null;
                     String encryptedMessage = null;
+
                     try {
                         encryptedKey = ois.readUTF();
                         msgSignature = ois.readUTF();
@@ -149,7 +151,6 @@ public class PortListener extends Thread {
                         logger.error("SENT MESSAGE HAS BAD SIGNATURE... RETURNING BLANK MESSAGE");
                         return;
                     }
-
                     RadioMessage message = new RadioMessage(resultBody);
                     RadioMessage response = respond(message);
 
@@ -175,11 +176,15 @@ public class PortListener extends Thread {
                         logger.error("FAILED TO CLOSE STREAMS / SOCKET");
                     }
                 });
-            } catch (IOException e) {
-                if (!server_listener.isClosed()) {
-                    e.printStackTrace();
-                    logger.error("ERRORED OUT - NO LONGER LISTENING ON PORT " + PORT);
+
+            }
+            catch (Exception e) {
+                if (server_listener.isClosed()) {
+                    logger.debug("server listener is closed!");
+                    return;
                 }
+                e.printStackTrace();
+                logger.error("ERRORED OUT - NO LONGER LISTENING ON PORT " + PORT);
             }
         }
     }
