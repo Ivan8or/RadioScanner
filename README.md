@@ -111,7 +111,7 @@ WALKTHROUGH (SENDING MESSAGES):
 =
 
 
-// 1.1 create a new RadioMessage object passing in an RSA keypair to the constructor 
+1.1 create a new RadioMessage object passing in an RSA keypair to the constructor 
 
 ```
 RadioMessage message = new RadioMessage(String rsa_key_pub, String rsa_key_priv);
@@ -119,7 +119,7 @@ RadioMessage message = new RadioMessage(String rsa_key_pub, String rsa_key_priv)
 
 
 
-// 1.2 set a reason for the message to be sent
+1.2 set a reason for the message to be sent
 
 ```
 message.put("reason", "do_i_have_enough_animals");
@@ -127,7 +127,7 @@ message.put("reason", "do_i_have_enough_animals");
 
 
 
-// 1.3 fill the message with any other string key-val pairs you want
+1.3 fill the message with any other string key-val pairs you want
 
 ```
 message.put("cats_owned", "2");
@@ -136,19 +136,21 @@ message.put("dogs_owned", "0");
 
 
 
-// 1.4 give the radio message your RSA keys so that it knows how to encrypt the message
+1.4 give the radio message your RSA keys so that it knows how to encrypt the message
 
-// P.S. the keypair i am using in this example is NOT a real key pair (intentionally) and should NOT be used
+P.S. the keypair i am using in this example is NOT a real key pair (intentionally) and should NOT be used
 
-// they are only here to get the point accross that you have to use the same keypair for 
+they are only here to get the point accross that you have to use the same keypair for 
 
-// both sending messages AND for receiving messages... common sense!
+both sending messages AND for receiving messages... common sense!
 
-// to generate a *REAL* keypair you can use 
+to generate a *REAL* keypair you can use 
 
-// 'String[] keypair = MessageEncryptor.genRSAKeyPair();' (index 0 is public, index 1 is private)
+```
+String[] keypair = MessageEncryptor.genRSAKeyPair();  //(index 0 is public, index 1 is private)
+```
 
-// instead of the gibberish i'm using in this walkthrough
+instead of the gibberish i'm using in this walkthrough
 
 
 ```
@@ -160,7 +162,7 @@ message.setRSAKeys(rsa_public_key, rsa_private_key);
 
 
 
-// 1.5 send the message to the correct IP / port
+1.5 send the message to the correct IP / port
 
 ```
 Future<RadioMessage> response_future = message.sendE("192.168.1.75", 25540);
@@ -168,7 +170,7 @@ Future<RadioMessage> response_future = message.sendE("192.168.1.75", 25540);
 
 
 
-// 1.6 wait for the response the server sent you back in the form of a second radio message
+1.6 wait for the response the server sent you back in the form of a second radio message
 
 ```
 RadioMessage my_response = response_future.get();
@@ -176,8 +178,8 @@ RadioMessage my_response = response_future.get();
 
 
 
-// 1.7   get values out of the response and use them for whatever 
-// P.S. the keys that you pass into the #get(key) function are set on the server side
+1.7   get values out of the response and use them for whatever 
+P.S. the keys that you pass into the #get(key) function are set on the server side
 
 ```
 String was_successful = my_response.get("success");
@@ -192,7 +194,7 @@ WALKTHROUGH (RECEIVING / RESPONDING TO MESSAGES):
 =
 
 
-// 2.1 create a WalkieTalkie object, with a constructor taking in your RSA public and private keys
+2.1 create a WalkieTalkie object, with a constructor taking in your RSA public and private keys
 
 ```
 String rsa_public_key = "AAAAADADKAWDADWD;NOTAREALKEY";
@@ -203,7 +205,7 @@ WalkieTalkie talkie = new WalkieTalkie(rsa_public_key, rsa_private_key);
 
 
 
-// 2.2 create some classes that extend ReasonResponder for every 'reason' a message would be sent:
+2.2 create some classes that extend ReasonResponder for every 'reason' a message would be sent:
 
 ```
 public class MyVeryOwnReasonRR extends ReasonResponder {
@@ -258,18 +260,18 @@ public class MyVeryOwnReasonRR extends ReasonResponder {
 ```
 
 
-// 2.7 after making your class that extends ReasonResponder, add an instance of it into your WalkieTalkie object:
+2.7 after making your class that extends ReasonResponder, add an instance of it into your WalkieTalkie object:
 
-// P.S. you also set the port on which the ReasonResponder is listening in this step
+P.S. you also set the port on which the ReasonResponder is listening in this step
 
-// P.S. see comment 1.2 uses "do_i_have_enough_animals" as the reason a request is being sent
+P.S. see comment 1.2 uses "do_i_have_enough_animals" as the reason a request is being sent
 
 ```
 int WALKIE_PORT = 25540;
 walkie.addResponse(WALKIE_PORT,new MyVeryOwnReasonRR("do_i_have_enough_animals", this));
 ```
 
-// that's it!
+that's it!
 
 
 
