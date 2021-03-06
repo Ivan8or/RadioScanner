@@ -8,6 +8,8 @@ import java.io.ObjectOutputStream;
 import java.net.Socket;
 import java.util.concurrent.Future;
 
+import org.apache.log4j.Logger;
+
 /*
 RadioMessage CLass
 
@@ -24,8 +26,12 @@ Represents a single JSON-based text message that can be sent over the network
 public class RadioMessage {
 
     private JSONObject message;
+
     private String RSA_PRIVATE_KEY;
     private String RSA_PUBLIC_KEY;
+
+    private static final Logger logger = Logger.getLogger(RadioMessage.class);
+    private boolean debug;
 
     public RadioMessage() {
         message = new JSONObject();
@@ -37,18 +43,27 @@ public class RadioMessage {
 
     // empties the object
     public RadioMessage clear() {
+        if(debug)
+            logger.debug("clearing message contents for message "+message);
+
+
         message = new JSONObject();
         return this;
     }
 
     // adds a new key/value pair to the JSON object
     public RadioMessage put(String key, String val) {
+        if(debug)
+            logger.debug("inserting "+key+" = "+val+" into message "+message);
+
         message.put(key, val);
         return this;
     }
 
     // sets the RSA keys that will be used for encryption when this message is sent
     public synchronized RadioMessage setRSAKeys(String public_key, String private_key) {
+        if(debug)
+            logger.debug("putting RSA keys into message "+message);
         RSA_PUBLIC_KEY = public_key;
         RSA_PRIVATE_KEY = private_key;
         return this;
@@ -56,28 +71,48 @@ public class RadioMessage {
 
     // alias for setRSAKeys
     public synchronized RadioMessage setRSAKeys(String[] keys) {
-        RSA_PUBLIC_KEY = keys[0];
-        RSA_PRIVATE_KEY = keys[1];
-        return this;
+        return setRSAKeys(keys[0], keys[1]);
     }
 
     // combines with a second message
     // absorbs any new key/value pairs, while not including any keys/value pairs
     // that it already holds a key for
     public RadioMessage merge(RadioMessage other) {
+        if(debug)
+            logger.debug("merging message "+message+" with message "+other+"...");
 
         for (String key : other.message.toMap().keySet())
             if (!message.has(key))
                 message.put(key, other.get(key));
 
+        if(debug)
+            logger.debug("merged! message now "+message);
+        return this;
+    }
+
+    public RadioMessage enableDebug() {
+        logger.debug("debugging enabled for message "+message);
+
+        debug = true;
+        return this;
+    }
+    public RadioMessage disableDebug() {
+        logger.debug("debugging disabled for message "+message);
+
+        debug = false;
         return this;
     }
 
     // gets the value for a certain key
     public String get(String key) {
+
         try {
+            if(debug)
+                logger.debug("pulling key "+key+" from message, result is "+message.getString(key));
+
             return message.getString(key);
         } catch (JSONException e) {
+            logger.error("no key "+key+" in message "+message);
             return null;
         }
     }
@@ -93,7 +128,8 @@ public class RadioMessage {
     @Deprecated
     public Future<RadioMessage> sendE(String IP, int port) {
 
-        System.out.println("sending message to IP "+IP+" and port "+port);
+        if(debug)
+            logger.debug("sending message "+message+" to "+IP+":"+port);
 
         return WalkieTalkie.sharedExecutor().submit(() -> {
             Socket socket = new Socket(IP, port);
@@ -121,7 +157,7 @@ public class RadioMessage {
                 responseSignature = ois.readUTF();
                 responseBody_b64 = ois.readUTF();
             } catch (Exception e) {
-                System.err.println("BAD RESPONSE FORMAT");
+                logger.error("SENT MESSAGE RECEIVED BAD RESPONSE... RETURNING BLANK MESSAGE");
                 return new RadioMessage()
                         .put("success","false")
                         .put("reason","BAD RESPONSE FORMAT");
@@ -135,14 +171,14 @@ public class RadioMessage {
                 resultBody = encryptor.decryptAES(responseBody_b64, resultAESKey);
                 validSignature = encryptor.verifySignature(resultBody, responseSignature);
             } catch (Exception e) {
-                System.err.println("BAD KEY - DECRYPTION FAILED!");
+                logger.error("SENT MESSAGE USED BAD CRYPT KEY... RETURNING BLANK MESSAGE");
                 return new RadioMessage()
                         .put("success","false")
                         .put("reason","BAD KEY - DECRYPTION FAILED");
             }
 
             if (!validSignature) {
-                System.err.println("SIGNATURE INVALID - IGNORING MESSAGE RESPONSE!");
+                logger.error("SENT MESSAGE HAS BAD SIGNATURE... RETURNING BLANK MESSAGE");
                 return new RadioMessage()
                         .put("success","false")
                         .put("reason","SIGNATURE INVALID - IGNORE MESSAGE RESPONSE!");
