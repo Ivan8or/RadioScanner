@@ -1,0 +1,11 @@
+<component name="ArtifactManager">
+  <artifact type="jar" name="RadioScanner:jar">
+    <output-path>$USER_HOME$/downloads</output-path>
+    <root id="archive" name="RadioScanner.jar">
+      <element id="module-output" name="RadioScanner" />
+      <element id="extracted-dir" path="$MAVEN_REPOSITORY$/com/google/code/gson/gson/2.8.6/gson-2.8.6.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$MAVEN_REPOSITORY$/com/konghq/unirest-java/3.11.02/unirest-java-3.11.02.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$MAVEN_REPOSITORY$/commons-codec/commons-codec/1.14/commons-codec-1.14.jar" path-in-jar="/" />
+    </root>
+  </artifact>
+</component>

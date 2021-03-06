@@ -1,0 +1,10 @@
+<component name="libraryTable">
+  <library name="target">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/target/original-RadioScanner-2.3.6-DEBUG.jar!/" />
+      <root url="jar://$PROJECT_DIR$/target/RadioScanner-2.3.6-DEBUG.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>

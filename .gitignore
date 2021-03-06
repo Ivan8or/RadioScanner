@@ -2,9 +2,10 @@
 .idea/
 build/
 gradle/
-.gitignore
 gradlew
 gradlew.bat
 build.gradle
 settings.gradle
 target/
+.gitignore
+src/test/
