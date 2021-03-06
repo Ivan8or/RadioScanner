@@ -29,7 +29,7 @@ dependencies {
 }
 
 group = 'online.umbcraft.libraries'
-version = '2.4.4'
+version = '2.4.4.1'
 description = 'RadioScanner'
 java.sourceCompatibility = JavaVersion.VERSION_1_8
 
@@ -42,7 +42,8 @@ publishing {
             name = "umbcraft-pub" //  optional target repository name
             url = "http://umbcraft.online:27018/repository/umbcraft-pub/"
             credentials {
-
+                username = "$usr"
+                password = "$pwd"
             }
         }
     }
