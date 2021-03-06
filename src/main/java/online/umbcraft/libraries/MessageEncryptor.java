@@ -1,6 +1,7 @@
 package online.umbcraft.libraries;
 
 import org.apache.commons.codec.binary.Base64;
+import org.apache.log4j.Logger;
 
 import java.security.*;
 import java.security.spec.PKCS8EncodedKeySpec;
@@ -15,6 +16,8 @@ public class MessageEncryptor {
 
     private final String PUBLIC_KEY_B64;
     private final String PRIVATE_KEY_B64;
+
+
 
     public MessageEncryptor(String pub_key_b64, String priv_key_b64) {
         this.PUBLIC_KEY_B64 = pub_key_b64;

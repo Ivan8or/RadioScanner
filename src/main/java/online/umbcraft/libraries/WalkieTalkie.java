@@ -1,9 +1,13 @@
 package online.umbcraft.libraries;
 
+import org.apache.log4j.Logger;
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+
+import org.apache.log4j.Logger;
 
 /*
 WalkieTalkie CLass
@@ -19,14 +23,37 @@ public class WalkieTalkie {
     private static String RSA_PUBLIC_B64;
     private static String RSA_PRIVATE_B64;
 
+    private boolean debug;
+    private static final Logger logger = Logger.getLogger(RadioMessage.class);
+
     public WalkieTalkie(String pub_key_b64, String priv_key_b64) {
+
+        if(debug)
+            logger.debug("creating WalkieTalkie ");
+
         scanners = new HashMap<>(2);
         RSA_PUBLIC_B64 = pub_key_b64;
         RSA_PRIVATE_B64 = priv_key_b64;
     }
 
+    public void enableDebug() {
+        logger.debug("debugging enabled for WalkieTalkie");
+        debug = true;
+    }
+
+    public void disableDebug() {
+        logger.debug("debugging disabled for WalkieTalkie");
+        debug = false;
+    }
+
+    public synchronized boolean isDebugging() {
+        return debug;
+    }
+
     // halts any listening serversockets
     public void stopListening() {
+        if(debug)
+            logger.debug("stopping listening for all listeners in WalkieTalkie");
         for(PortListener listener: scanners.values()) {
             listener.stopListening();
         }
@@ -39,8 +66,12 @@ public class WalkieTalkie {
     }
 
     public void addResponse(int port, ReasonResponder responder) {
+
+        if(debug)
+            logger.debug("adding ReasonResponder to WalkieTalkie with reason "+responder.getReason());
+
         if(scanners.get(port) == null) {
-            PortListener listener = new PortListener(port, RSA_PUBLIC_B64, RSA_PRIVATE_B64);
+            PortListener listener = new PortListener(this, port, RSA_PUBLIC_B64, RSA_PRIVATE_B64);
             listener.start();
             scanners.put(port, listener);
         }
