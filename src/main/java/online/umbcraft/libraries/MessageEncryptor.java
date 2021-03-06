@@ -25,8 +25,6 @@ public class MessageEncryptor {
     private final String PUBLIC_KEY_B64;
     private final String PRIVATE_KEY_B64;
 
-
-
     public MessageEncryptor(String pub_key_b64, String priv_key_b64) {
         this.PUBLIC_KEY_B64 = pub_key_b64;
         this.PRIVATE_KEY_B64 = priv_key_b64;
