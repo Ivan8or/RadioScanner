@@ -145,8 +145,7 @@ public class RadioMessage {
                 if(debug)
                     logger.error("FAILED TO CONNECT TO "+IP+":"+port+"... RETURNING BLANK MESSAGE");
                 return new RadioMessage()
-                        .put("success","false")
-                        .put("reason",RadioError.FAILED_TO_CONNECT.name());
+                        .put("TRANSMIT_ERROR",RadioError.FAILED_TO_CONNECT.name());
             }
 
             ObjectOutputStream oos = new ObjectOutputStream(socket.getOutputStream());
@@ -175,8 +174,7 @@ public class RadioMessage {
                 if(debug)
                     logger.error("SENT MESSAGE RECEIVED BAD RESPONSE... RETURNING BLANK MESSAGE");
                 return new RadioMessage()
-                        .put("success", "false")
-                        .put("reason", RadioError.BAD_NETWORK_RESPONSE.name());
+                        .put("TRANSMIT_ERROR", RadioError.BAD_NETWORK_RESPONSE.name());
             }
 
             String resultAESKey = null;
@@ -190,16 +188,14 @@ public class RadioMessage {
                 if(debug)
                     logger.error("SENT MESSAGE USED BAD CRYPT KEY... RETURNING BLANK MESSAGE");
                 return new RadioMessage()
-                        .put("success", "false")
-                        .put("reason", RadioError.MISFORMATTED_RSA_KEY.name());
+                        .put("TRANSMIT_ERROR", RadioError.MISFORMATTED_RSA_KEY.name());
             }
 
             if (!validSignature) {
                 if(debug)
                     logger.error("SENT MESSAGE HAS BAD SIGNATURE... RETURNING BLANK MESSAGE");
                 return new RadioMessage()
-                        .put("success", "false")
-                        .put("reason", RadioError.INVALID_SIGNATURE.name());
+                        .put("TRANSMIT_ERROR", RadioError.INVALID_SIGNATURE.name());
             }
 
             ois.close();
