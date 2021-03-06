@@ -24,7 +24,7 @@ public class WalkieTalkie {
     private static String RSA_PRIVATE_B64;
 
     private boolean debug;
-    private static final Logger logger = Logger.getLogger(RadioMessage.class);
+    private static final Logger logger = Logger.getLogger(WalkieTalkie.class);
 
     public WalkieTalkie(String pub_key_b64, String priv_key_b64) {
 

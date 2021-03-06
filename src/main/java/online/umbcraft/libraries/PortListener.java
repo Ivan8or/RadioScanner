@@ -22,7 +22,7 @@ can contain multiple responders, one for any unique message reason
 
 public class PortListener extends Thread {
 
-    private static final Logger logger = Logger.getLogger(RadioMessage.class);
+    private static final Logger logger = Logger.getLogger(PortListener.class);
     private final String RSA_PRIVATE_KEY;
     private final String RSA_PUBLIC_KEY;
     private final int PORT;
@@ -54,6 +54,10 @@ public class PortListener extends Thread {
     }
 
     public void stopListening() {
+
+        if (talkie.isDebugging())
+            logger.debug("stopping listening on port " + PORT);
+
         running = false;
         if (server_listener != null) {
             try {
@@ -96,6 +100,7 @@ public class PortListener extends Thread {
         }
 
         while (running) {
+            System.out.println("test");
             try {
                 Socket clientSocket = server_listener.accept();
 
@@ -174,9 +179,7 @@ public class PortListener extends Thread {
                     }
                 });
             } catch (IOException e) {
-                if (server_listener.isClosed())
-                    logger.debug("STOPPED LISTENING ON PORT " + getPort());
-                else {
+                if (!server_listener.isClosed()) {
                     e.printStackTrace();
                     logger.error("ERRORED OUT - NO LONGER LISTENING ON PORT " + PORT);
                 }
