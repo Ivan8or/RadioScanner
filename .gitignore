@@ -1,0 +1,6 @@
+.gradle/
+.idea/
+build/
+gradle/
+target/
+src/test/
