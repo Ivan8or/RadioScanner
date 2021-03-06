@@ -271,7 +271,21 @@ int WALKIE_PORT = 25540;
 walkie.addResponse(WALKIE_PORT,new MyVeryOwnReasonRR("do_i_have_enough_animals", this));
 ```
 
-that's it!
+
+
+
+ERROR CHECKING:
+=
+
+
+if using the #send(...) function encounters some issue with sending the message, it will  
+
+return a Future that contains a radio message with the contents "TRANSMIT_ERROR" = (your error)
+
+All of the errors are listed in the RadioError enum class.
+
+
+
 
 
 
