@@ -10,7 +10,7 @@ dependency group id: online.umbcraft.libraries
 
 dependency artifact Id: RadioScanner
 
-dependency version: 2.4.7
+dependency version: 2.4.8
 
 
 

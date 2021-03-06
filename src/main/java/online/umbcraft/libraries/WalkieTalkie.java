@@ -5,10 +5,8 @@ import org.apache.log4j.Logger;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
 
 /*
 WalkieTalkie CLass
@@ -52,6 +50,11 @@ public class WalkieTalkie {
         debug = false;
     }
 
+    public static void initLogger() {
+        if(!Logger.getRootLogger().getAllAppenders().hasMoreElements())
+            BasicConfigurator.configure();
+    }
+
     public synchronized boolean isDebugging() {
         return debug;
     }
@@ -63,7 +66,6 @@ public class WalkieTalkie {
         for (PortListener listener : scanners.values()) {
             listener.stopListening();
         }
-        executor.shutdown();
     }
 
     public void addResponse(int port, ReasonResponder responder) {
