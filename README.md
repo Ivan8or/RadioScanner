@@ -1,4 +1,4 @@
-A simplified way to have event-based java networking!
+A simplified way to have message->response java networking!
 
 
 maven repo / dependencies:
