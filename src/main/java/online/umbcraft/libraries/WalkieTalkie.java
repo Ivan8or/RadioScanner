@@ -29,7 +29,7 @@ public class WalkieTalkie {
     public WalkieTalkie(String pub_key_b64, String priv_key_b64) {
 
         if(debug)
-            logger.debug("creating WalkieTalkie ");
+            logger.debug("creating WalkieTalkie");
 
         scanners = new HashMap<>(2);
         RSA_PUBLIC_B64 = pub_key_b64;
@@ -50,7 +50,7 @@ public class WalkieTalkie {
         return debug;
     }
 
-    // halts any listening serversockets
+    // halts all listening ports
     public void stopListening() {
         if(debug)
             logger.debug("stopping listening for all listeners in WalkieTalkie");
