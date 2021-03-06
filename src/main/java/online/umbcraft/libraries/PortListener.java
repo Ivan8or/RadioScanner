@@ -112,25 +112,30 @@ public class PortListener extends Thread {
                     ObjectInputStream ois = null;
                     ObjectOutputStream oos = null;
 
+                    boolean still_fine = true;
+
                     try {
                         ois = new ObjectInputStream(clientSocket.getInputStream());
                         oos = new ObjectOutputStream(clientSocket.getOutputStream());
                     } catch (Exception e) {
                         logger.error("FAILED TO OPEN INPUT STREAMS");
-                        return;
+                        still_fine = false;
                     }
+
+
                     String encryptedKey = null;
                     String msgSignature = null;
                     String encryptedMessage = null;
 
-                    try {
-                        encryptedKey = ois.readUTF();
-                        msgSignature = ois.readUTF();
-                        encryptedMessage = ois.readUTF();
-                    } catch (Exception e) {
-                        logger.error("SENT MESSAGE RECEIVED BAD RESPONSE... RETURNING BLANK MESSAGE");
-                        System.err.println("BAD MESSAGE FORMAT");
-                        return;
+                    if (still_fine) {
+                        try {
+                            encryptedKey = ois.readUTF();
+                            msgSignature = ois.readUTF();
+                            encryptedMessage = ois.readUTF();
+                        } catch (Exception e) {
+                            logger.error("SENT MESSAGE RECEIVED BAD RESPONSE... NOT RESPONDING");
+                            still_fine = false;
+                        }
                     }
 
 
@@ -138,47 +143,57 @@ public class PortListener extends Thread {
                     String AESKey = null;
                     String resultBody = null;
                     boolean validSignature = false;
-                    try {
-                        encryptor = new MessageEncryptor(RSA_PUBLIC_KEY, RSA_PRIVATE_KEY);
-                        AESKey = encryptor.decryptRSA(encryptedKey);
-                        resultBody = encryptor.decryptAES(encryptedMessage, AESKey);
-                        validSignature = encryptor.verifySignature(resultBody, msgSignature);
-                    } catch (Exception e) {
-                        logger.error("SENT MESSAGE USED BAD CRYPT KEY... RETURNING BLANK MESSAGE");
+
+                    if (still_fine) {
+                        try {
+                            encryptor = new MessageEncryptor(RSA_PUBLIC_KEY, RSA_PRIVATE_KEY);
+                            AESKey = encryptor.decryptRSA(encryptedKey);
+                            resultBody = encryptor.decryptAES(encryptedMessage, AESKey);
+                            validSignature = encryptor.verifySignature(resultBody, msgSignature);
+                        } catch (Exception e) {
+                            logger.error("SENT MESSAGE USED BAD CRYPT KEY... NOT RESPONDING");
+                            still_fine = false;
+                        }
+                        if (!validSignature) {
+                            logger.error("SENT MESSAGE HAS BAD SIGNATURE... NOT RESPONDING");
+                            still_fine = false;
+                        }
                     }
 
-                    if (!validSignature) {
-                        logger.error("SENT MESSAGE HAS BAD SIGNATURE... RETURNING BLANK MESSAGE");
-                        return;
-                    }
-                    RadioMessage message = new RadioMessage(resultBody);
-                    RadioMessage response = respond(message);
 
-                    String newKey_b64 = MessageEncryptor.genAESKey();
-                    String encryptedResponse = encryptor.encryptAES(response.toString(), newKey_b64);
-                    String newEncryptedKey = encryptor.encryptRSA(newKey_b64);
-                    String newSignature = encryptor.generateSignature(response.toString());
+                    if (still_fine) {
+                        RadioMessage message = new RadioMessage(resultBody);
+                        RadioMessage response = respond(message);
+
+                        String newKey_b64 = MessageEncryptor.genAESKey();
+                        String encryptedResponse = encryptor.encryptAES(response.toString(), newKey_b64);
+                        String newEncryptedKey = encryptor.encryptRSA(newKey_b64);
+                        String newSignature = encryptor.generateSignature(response.toString());
+
+                        try {
+                            oos.writeUTF(newEncryptedKey);
+                            oos.writeUTF(newSignature);
+                            oos.writeUTF(encryptedResponse);
+                        } catch (Exception e) {
+                            logger.error("FAILED TO SEND RESPONSE ACROSS");
+                        }
+                    }
 
                     try {
-                        oos.writeUTF(newEncryptedKey);
-                        oos.writeUTF(newSignature);
-                        oos.writeUTF(encryptedResponse);
-                    } catch (Exception e) {
-                        logger.error("FAILED TO SEND RESPONSE ACROSS");
-                    }
+                        if (oos != null)
+                            oos.flush();
+                        if (ois != null)
+                            ois.close();
+                        if (oos != null)
+                            oos.close();
 
-                    try {
-                        oos.flush();
-                        ois.close();
-                        oos.close();
                         clientSocket.close();
                     } catch (Exception e) {
                         logger.error("FAILED TO CLOSE STREAMS / SOCKET");
                     }
                 });
 
-            }
-            catch (Exception e) {
+            } catch (Exception e) {
                 if (server_listener.isClosed()) {
                     logger.debug("server listener is closed!");
                     return;
