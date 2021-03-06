@@ -78,7 +78,7 @@ public static void main(String[] args) {
         toSend.setRSAKeys(keypair[0], keypair[1]);
 
         // sending the message to the server and getting a future back
-        Future<RadioMessage> response = toSend.sendE("127.0.0.1", 25540);
+        Future<RadioMessage> response = toSend.send("127.0.0.1", 25540);
 
         // getting the value from the future! (
         // will block thread, so do only if you're okay with
@@ -165,7 +165,7 @@ message.setRSAKeys(rsa_public_key, rsa_private_key);
 1.5 send the message to the correct IP / port
 
 ```
-Future<RadioMessage> response_future = message.sendE("192.168.1.75", 25540);
+Future<RadioMessage> response_future = message.send("192.168.1.75", 25540);
 ```
 
 
