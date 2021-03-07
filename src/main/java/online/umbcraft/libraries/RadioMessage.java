@@ -132,9 +132,10 @@ public class RadioMessage {
     @Deprecated
     public Future<RadioMessage> sendE(String IP, int port) {
 
+        ProcessTimer timer = new ProcessTimer();
+
         if (debug)
             logger.info("sending message " + message + " to " + IP + ":" + port);
-
 
 
         return WalkieTalkie.sharedExecutor().submit(() -> {
@@ -202,6 +203,9 @@ public class RadioMessage {
             ois.close();
             oos.close();
             socket.close();
+
+            if(debug)
+                logger.info("message to " + IP + ":" + port +" took "+timer.time()+" ms");
 
             return new RadioMessage(resultBody);
         });
