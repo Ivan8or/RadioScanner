@@ -1,6 +1,6 @@
 package online.umbcraft.libraries;
 
-import org.apache.log4j.Logger;
+//import org.apache.log4j.Logger;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -10,6 +10,7 @@ import java.net.Socket;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.logging.Logger;
 
 /*
 PortListener CLass
@@ -54,7 +55,7 @@ public class PortListener extends Thread {
     public void stopListening() {
 
         if (talkie.isDebugging())
-            logger.debug("stopping listening on port " + PORT);
+            logger.info("stopping listening on port " + PORT);
 
         if (server_listener != null) {
 
@@ -69,7 +70,7 @@ public class PortListener extends Thread {
     private RadioMessage respond(RadioMessage message) {
 
         if (talkie.isDebugging())
-            logger.debug("responding to message " + message);
+            logger.info("responding to message " + message);
 
         ReasonResponder responder = responders.get(message.get("reason"));
         RadioMessage response;
@@ -81,7 +82,7 @@ public class PortListener extends Thread {
             response = responder.response(message);
 
         if (talkie.isDebugging())
-            logger.debug("response is " + response);
+            logger.info("response is " + response);
 
         return response;
     }
@@ -102,7 +103,7 @@ public class PortListener extends Thread {
                 Socket clientSocket = server_listener.accept();
 
                 if (talkie.isDebugging())
-                    logger.debug("receiving message from IP " + clientSocket.getInetAddress());
+                    logger.info("receiving message from IP " + clientSocket.getInetAddress());
 
                 clientSocket.setSoTimeout(3000);
 
@@ -117,7 +118,7 @@ public class PortListener extends Thread {
                         ois = new ObjectInputStream(clientSocket.getInputStream());
                         oos = new ObjectOutputStream(clientSocket.getOutputStream());
                     } catch (Exception e) {
-                        logger.error("FAILED TO OPEN INPUT STREAMS");
+                        logger.severe("FAILED TO OPEN INPUT STREAMS");
                         still_fine = false;
                     }
 
@@ -132,7 +133,7 @@ public class PortListener extends Thread {
                             msgSignature = ois.readUTF();
                             encryptedMessage = ois.readUTF();
                         } catch (Exception e) {
-                            logger.error("SENT MESSAGE RECEIVED BAD RESPONSE... NOT RESPONDING");
+                            logger.severe("SENT MESSAGE RECEIVED BAD RESPONSE... NOT RESPONDING");
                             still_fine = false;
                         }
                     }
@@ -150,11 +151,11 @@ public class PortListener extends Thread {
                             resultBody = encryptor.decryptAES(encryptedMessage, AESKey);
                             validSignature = encryptor.verifySignature(resultBody, msgSignature);
                         } catch (Exception e) {
-                            logger.error("SENT MESSAGE USED BAD CRYPT KEY... NOT RESPONDING");
+                            logger.severe("SENT MESSAGE USED BAD CRYPT KEY... NOT RESPONDING");
                             still_fine = false;
                         }
                         if (!validSignature) {
-                            logger.error("SENT MESSAGE HAS BAD SIGNATURE... NOT RESPONDING");
+                            logger.severe("SENT MESSAGE HAS BAD SIGNATURE... NOT RESPONDING");
                             still_fine = false;
                         }
                     }
@@ -174,7 +175,7 @@ public class PortListener extends Thread {
                             oos.writeUTF(newSignature);
                             oos.writeUTF(encryptedResponse);
                         } catch (Exception e) {
-                            logger.error("FAILED TO SEND RESPONSE ACROSS");
+                            logger.severe("FAILED TO SEND RESPONSE ACROSS");
                         }
                     }
 
@@ -188,17 +189,17 @@ public class PortListener extends Thread {
 
                         clientSocket.close();
                     } catch (Exception e) {
-                        logger.error("FAILED TO CLOSE STREAMS / SOCKET");
+                        logger.severe("FAILED TO CLOSE STREAMS / SOCKET");
                     }
                 });
 
             } catch (Exception e) {
                 if (server_listener.isClosed()) {
-                    logger.debug("server listener is closed!");
+                    logger.info("server listener is closed!");
                     return;
                 }
                 e.printStackTrace();
-                logger.error("ERRORED OUT - NO LONGER LISTENING ON PORT " + PORT);
+                logger.severe("ERRORED OUT - NO LONGER LISTENING ON PORT " + PORT);
             }
         }
     }

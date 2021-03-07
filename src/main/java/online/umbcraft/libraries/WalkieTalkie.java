@@ -1,12 +1,13 @@
 package online.umbcraft.libraries;
 
-import org.apache.log4j.BasicConfigurator;
-import org.apache.log4j.Logger;
+//import org.apache.log4j.BasicConfigurator;
+//import org.apache.log4j.Logger;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.logging.Logger;
 
 /*
 WalkieTalkie CLass
@@ -27,11 +28,17 @@ public class WalkieTalkie {
     public WalkieTalkie(String pub_key_b64, String priv_key_b64) {
 
         if (debug)
-            logger.debug("creating WalkieTalkie");
+            logger.info("creating WalkieTalkie");
 
         scanners = new HashMap<>(2);
         RSA_PUBLIC_B64 = pub_key_b64;
         RSA_PRIVATE_B64 = priv_key_b64;
+    }
+
+    public static void main(String[] args) {
+        RadioMessage m = new RadioMessage();
+        m.enableDebug();
+        m.put("a","b");
     }
 
     // gives the executorservice which may hold any hot threads,
@@ -41,18 +48,18 @@ public class WalkieTalkie {
     }
 
     public void enableDebug() {
-        logger.debug("debugging enabled for WalkieTalkie");
+        logger.info("debugging enabled for WalkieTalkie");
         debug = true;
     }
 
     public void disableDebug() {
-        logger.debug("debugging disabled for WalkieTalkie");
+        logger.info("debugging disabled for WalkieTalkie");
         debug = false;
     }
 
     public static void initLogger() {
-        if(!Logger.getRootLogger().getAllAppenders().hasMoreElements())
-            BasicConfigurator.configure();
+        //if(!Logger.getRootLogger().getAllAppenders().hasMoreElements())
+         //   BasicConfigurator.configure();
     }
     public static void setLogger(Logger new_logger) {
         logger = new_logger;
@@ -70,7 +77,7 @@ public class WalkieTalkie {
     // halts all listening ports
     public void stopListening() {
         if (debug)
-            logger.debug("stopping listening for all listeners in WalkieTalkie");
+            logger.info("stopping listening for all listeners in WalkieTalkie");
         for (PortListener listener : scanners.values()) {
             listener.stopListening();
         }
@@ -79,7 +86,7 @@ public class WalkieTalkie {
     public void addResponse(int port, ReasonResponder responder) {
 
         if (debug)
-            logger.debug("adding ReasonResponder to WalkieTalkie with reason " + responder.getReason());
+            logger.info("adding ReasonResponder to WalkieTalkie with reason " + responder.getReason());
 
         if (scanners.get(port) == null) {
             PortListener listener = new PortListener(this, port, RSA_PUBLIC_B64, RSA_PRIVATE_B64);

@@ -8,8 +8,9 @@ import java.io.ObjectOutputStream;
 import java.net.Socket;
 import java.net.UnknownHostException;
 import java.util.concurrent.Future;
+import java.util.logging.Logger;
 
-import org.apache.log4j.Logger;
+//import org.apache.log4j.Logger;
 
 import javax.lang.model.UnknownEntityException;
 
@@ -46,7 +47,7 @@ public class RadioMessage {
     // empties the object
     public RadioMessage clear() {
         if (debug)
-            logger.debug("clearing message contents for message " + message);
+            logger.info("clearing message contents for message " + message);
 
 
         message = new JSONObject();
@@ -56,7 +57,7 @@ public class RadioMessage {
     // adds a new key/value pair to the JSON object
     public RadioMessage put(String key, String val) {
         if (debug)
-            logger.debug("inserting " + key + " = " + val + " into message " + message);
+            logger.info("inserting " + key + " = " + val + " into message " + message);
 
         message.put(key, val);
         return this;
@@ -65,7 +66,7 @@ public class RadioMessage {
     // sets the RSA keys that will be used for encryption when this message is sent
     public synchronized RadioMessage setRSAKeys(String public_key, String private_key) {
         if (debug)
-            logger.debug("putting RSA keys into message " + message);
+            logger.info("putting RSA keys into message " + message);
         RSA_PUBLIC_KEY = public_key;
         RSA_PRIVATE_KEY = private_key;
         return this;
@@ -81,26 +82,26 @@ public class RadioMessage {
     // that it already holds a key for
     public RadioMessage merge(RadioMessage other) {
         if (debug)
-            logger.debug("merging message " + message + " with message " + other + "...");
+            logger.info("merging message " + message + " with message " + other + "...");
 
         for (String key : other.message.toMap().keySet())
             if (!message.has(key))
                 message.put(key, other.get(key));
 
         if (debug)
-            logger.debug("resulting message: " + message);
+            logger.info("resulting message: " + message);
         return this;
     }
 
     public RadioMessage enableDebug() {
-        logger.debug("debugging enabled for message " + message);
+        logger.info("debugging enabled for message " + message);
 
         debug = true;
         return this;
     }
 
     public RadioMessage disableDebug() {
-        logger.debug("debugging disabled for message " + message);
+        logger.info("debugging disabled for message " + message);
 
         debug = false;
         return this;
@@ -111,11 +112,11 @@ public class RadioMessage {
 
         try {
             if (debug)
-                logger.debug("pulling key " + key + " from message, result is " + message.getString(key));
+                logger.info("pulling key " + key + " from message, result is " + message.getString(key));
 
             return message.getString(key);
         } catch (JSONException e) {
-            logger.error("no key " + key + " in message " + message);
+            logger.severe("no key " + key + " in message " + message);
             return null;
         }
     }
@@ -132,7 +133,7 @@ public class RadioMessage {
     public Future<RadioMessage> sendE(String IP, int port) {
 
         if (debug)
-            logger.debug("sending message " + message + " to " + IP + ":" + port);
+            logger.info("sending message " + message + " to " + IP + ":" + port);
 
 
 
@@ -143,7 +144,7 @@ public class RadioMessage {
                 socket = new Socket(IP, port);
             }catch(Exception e) {
                 if(debug)
-                    logger.error("FAILED TO CONNECT TO "+IP+":"+port+"... RETURNING BLANK MESSAGE");
+                    logger.severe("FAILED TO CONNECT TO "+IP+":"+port+"... RETURNING BLANK MESSAGE");
                 return new RadioMessage()
                         .put("TRANSMIT_ERROR",RadioError.FAILED_TO_CONNECT.name());
             }
@@ -172,7 +173,7 @@ public class RadioMessage {
                 responseBody_b64 = ois.readUTF();
             } catch (Exception e) {
                 if(debug)
-                    logger.error("SENT MESSAGE RECEIVED BAD RESPONSE... RETURNING BLANK MESSAGE");
+                    logger.severe("SENT MESSAGE RECEIVED BAD RESPONSE... RETURNING BLANK MESSAGE");
                 return new RadioMessage()
                         .put("TRANSMIT_ERROR", RadioError.BAD_NETWORK_RESPONSE.name());
             }
@@ -186,14 +187,14 @@ public class RadioMessage {
                 validSignature = encryptor.verifySignature(resultBody, responseSignature);
             } catch (Exception e) {
                 if(debug)
-                    logger.error("SENT MESSAGE USED BAD CRYPT KEY... RETURNING BLANK MESSAGE");
+                    logger.severe("SENT MESSAGE USED BAD CRYPT KEY... RETURNING BLANK MESSAGE");
                 return new RadioMessage()
                         .put("TRANSMIT_ERROR", RadioError.MISFORMATTED_RSA_KEY.name());
             }
 
             if (!validSignature) {
                 if(debug)
-                    logger.error("SENT MESSAGE HAS BAD SIGNATURE... RETURNING BLANK MESSAGE");
+                    logger.severe("SENT MESSAGE HAS BAD SIGNATURE... RETURNING BLANK MESSAGE");
                 return new RadioMessage()
                         .put("TRANSMIT_ERROR", RadioError.INVALID_SIGNATURE.name());
             }
