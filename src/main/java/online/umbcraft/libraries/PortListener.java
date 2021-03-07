@@ -98,7 +98,6 @@ public class PortListener extends Thread {
         }
 
         while (true) {
-            logger.debug("while loop :)");
             try {
                 Socket clientSocket = server_listener.accept();
 
