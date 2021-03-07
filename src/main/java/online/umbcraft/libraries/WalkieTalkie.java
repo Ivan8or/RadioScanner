@@ -17,7 +17,7 @@ Also owns the ExecutorService which the other network-related classes use to run
 
 public class WalkieTalkie {
 
-    private static final Logger logger = Logger.getLogger(WalkieTalkie.class.getSimpleName());
+    private static Logger logger = Logger.getLogger(WalkieTalkie.class.getSimpleName());
     private static ExecutorService executor = Executors.newCachedThreadPool();
     private static String RSA_PUBLIC_B64;
     private static String RSA_PRIVATE_B64;
@@ -54,6 +54,14 @@ public class WalkieTalkie {
         if(!Logger.getRootLogger().getAllAppenders().hasMoreElements())
             BasicConfigurator.configure();
     }
+    public static void setLogger(Logger new_logger) {
+        logger = new_logger;
+    }
+
+    public static Logger getLogger() {
+        return logger;
+    }
+
 
     public synchronized boolean isDebugging() {
         return debug;

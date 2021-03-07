@@ -29,7 +29,7 @@ Represents a single JSON-based text message that can be sent over the network
 
 public class RadioMessage {
 
-    private static final Logger logger = Logger.getLogger(RadioMessage.class.getSimpleName());
+    private static final Logger logger = WalkieTalkie.getLogger();
     private JSONObject message;
     private String RSA_PRIVATE_KEY;
     private String RSA_PUBLIC_KEY;

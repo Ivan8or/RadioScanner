@@ -20,7 +20,7 @@ can contain multiple responders, one for any unique message reason
 
 public class PortListener extends Thread {
 
-    private static final Logger logger = Logger.getLogger(PortListener.class.getSimpleName());
+    private static final Logger logger = WalkieTalkie.getLogger();
     private final String RSA_PRIVATE_KEY;
     private final String RSA_PUBLIC_KEY;
     private final int PORT;
