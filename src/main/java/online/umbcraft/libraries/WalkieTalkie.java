@@ -44,23 +44,6 @@ public class WalkieTalkie {
     }
 
 
-    public static void main(String[] args) {
-        WalkieTalkie a = new WalkieTalkie("", "");
-        sharedExecutor();
-        a.enableDebug();
-        getLogger();
-        setLogger(null);
-        a.isDebugging();
-        a.stopListening();
-        a.addResponse(1, null);
-        RadioMessage aa = null;
-        aa.clear();
-        aa.merge(aa);
-        aa.get("");
-        aa.sendE("aa",1);
-    }
-
-
     /**
      * Gives the shared ExecutorService used for async events
      *
