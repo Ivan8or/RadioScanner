@@ -18,7 +18,7 @@ import java.util.logging.Logger;
  * - each request message must include a 'reason',<p>
  * - each response message must include a 'success',<p>
  * - and if the success is false then the 'reason' for that failure<p>
- * when <a href="#{@link}">{@link RadioMessage}</a>s are sent they return a Future containing the response from the receiver
+ * when {@link RadioMessage}s are sent they return a Future containing the response from the receiver
  *
  * @see ReasonResponder
  * @see WalkieTalkie
@@ -109,11 +109,11 @@ public class RadioMessage {
 
 
     /**
-     * combines itself with a second <a href="#{@link}">{@link RadioMessage}</a>
+     * combines itself with a second {@link RadioMessage}
      * absorbs any new key/value pairs for which this did not yet contain the key
      * ignores any keys/value pairs this already holds a key for
      *
-     * @param other A second <a href="#{@link}">{@link RadioMessage}</a> from which this copies all key-value pairs
+     * @param other A second {@link RadioMessage} from which this copies all key-value pairs
      * @return itself
      */
     public RadioMessage merge(RadioMessage other) {
@@ -192,7 +192,7 @@ public class RadioMessage {
      *
      * @param IP   the destination IPv4 address
      * @param port the destination port
-     * @return A <a href="#{@link}">{@link Future}</a> containing the reply sent by the <a href="#{@link}">{@link ReasonResponder}</a> which received the message
+     * @return A {@link Future}bcontaining the reply sent by the {@link ReasonResponder} which received the message
      */
     @Deprecated
     public Future<RadioMessage> sendE(String IP, int port) {
@@ -284,7 +284,7 @@ public class RadioMessage {
      *
      * @param IP   the destination IPv4 address
      * @param port the destination port
-     * @return A <a href="#{@link}">{@link Future}</a> containing the reply sent by the <a href="#{@link}">{@link ReasonResponder}</a> which received the message
+     * @return A {@link Future} containing the reply sent by the {@link ReasonResponder} which received the message
      */
     @Deprecated
     public Future<RadioMessage> sendE(String IP, String port) {
@@ -303,7 +303,7 @@ public class RadioMessage {
      * encrypts and sends itself to a specified IP and port
      *
      * @param address the destination IPv4 address, made up of IP:port
-     * @return A <a href="#{@link}">{@link Future}</a> containing the reply sent by the <a href="#{@link}">{@link ReasonResponder}</a> which received the message
+     * @return A {@link Future} containing the reply sent by the {@link ReasonResponder} which received the message
      */
     @Deprecated
     public Future<RadioMessage> sendE(String address) {
@@ -330,7 +330,7 @@ public class RadioMessage {
      *
      * @param ip   the destination IPv4 address
      * @param port the destination port
-     * @return A <a href="#{@link}">{@link Future}</a> containing the reply sent by the <a href="#{@link}">{@link ReasonResponder}</a> which received the message
+     * @return A {@link Future} containing the reply sent by the {@link ReasonResponder} which received the message
      */
     public Future<RadioMessage> send(String ip, int port) {
         return sendE(ip, port);
@@ -342,7 +342,7 @@ public class RadioMessage {
      *
      * @param ip   the destination IPv4 address
      * @param port the destination port
-     * @return A <a href="#{@link}">{@link Future}</a> containing the reply sent by the <a href="#{@link}">{@link ReasonResponder}</a> which received the message
+     * @return A {@link Future} containing the reply sent by the {@link ReasonResponder} which received the message
      */
     public Future<RadioMessage> send(String ip, String port) {
         return sendE(ip, port);
@@ -353,7 +353,7 @@ public class RadioMessage {
      * encrypts and sends itself to a specified IP and port
      *
      * @param full_address the destination IPv4 address, made up of IP:port
-     * @return A <a href="#{@link}">{@link Future}</a> containing the reply sent by the <a href="#{@link}">{@link ReasonResponder}</a> which received the message
+     * @return A {@link Future} containing the reply sent by the {@link ReasonResponder} which received the message
      */
     public Future<RadioMessage> send(String full_address) {
         return sendE(full_address);

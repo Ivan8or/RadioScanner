@@ -1,7 +1,7 @@
 package online.umbcraft.libraries;
 
 /**
- * Responsible for responding to a single type/reason of <a href="#{@link}">{@link RadioMessage}</a><p>
+ * Responsible for responding to a single type/reason of {@link RadioMessage}<p>
  * Extend this class to add custom logic for whenever a RadioMessage is received
  *
  * @see ReasonResponder
@@ -16,7 +16,7 @@ public abstract class ReasonResponder {
     /**
      * Creates a blank ReasonResponder and sets the reason
      *
-     * @param reason String which if any <a href="#{@link}">{@link RadioMessage}</a><p> share, this will reply to them
+     * @param reason String which if any {@link RadioMessage}<p> share, this will reply to them
      */
     public ReasonResponder(String reason) {
         this.reason = reason;
@@ -24,7 +24,9 @@ public abstract class ReasonResponder {
 
 
     /**
-     * Returns the <a href="#{@link}">{@link RadioMessage}</a> reason this object responds to
+     * Returns the {@link RadioMessage} reason this object responds to
+     *
+     * @return the type of message this responds to
      */
     public final String getReason() {
         return reason;
@@ -32,7 +34,7 @@ public abstract class ReasonResponder {
 
 
     /**
-     * generates a <a href="#{@link}">{@link RadioMessage}</a> to be sent in response to an incoming <a href="#{@link}">{@link RadioMessage}</a>
+     * generates a {@link RadioMessage} to be sent in response to an incoming {@link RadioMessage}
      *
      * @param message the incoming message
      * @return the generated reply

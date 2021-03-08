@@ -35,7 +35,7 @@ public class MessageEncryptor {
 
 
     /**
-     * Creates a <a href="#{@link}">{@link MessageEncryptor}</a> which uses the specified RSA keyset
+     * Creates a {@link MessageEncryptor} which uses the specified RSA keyset
      *
      * @param keyset_b64 array containing the base64 RSA keyset <p>(index 0 is public, index 1 is private)
      */
@@ -46,7 +46,7 @@ public class MessageEncryptor {
 
 
     /**
-     * Creates a <a href="#{@link}">{@link MessageEncryptor}</a> which uses the specified RSA keyset
+     * Creates a {@link MessageEncryptor} which uses the specified RSA keyset
      *
      * @param pub_key_b64       the public RSA key in base64
      * @param priv_key_b64      the private RSA key in base64
@@ -258,11 +258,11 @@ public class MessageEncryptor {
 
 
     /**
-     * Creates a <a href="#{@link}">{@link PublicKey}</a> object from a base64 encoded RSA public key
+     * Creates a {@link PublicKey} object from a base64 encoded RSA public key
      *
      * @param pub_key_b64       the base64 encoded public RSA key
      *
-     * @return the generated <a href="#{@link}">{@link PublicKey}</a>
+     * @return the generated {@link PublicKey}
      */
     private static PublicKey makePubKey(String pub_key_b64) {
         try {
@@ -279,11 +279,11 @@ public class MessageEncryptor {
 
 
     /**
-     * Creates a <a href="#{@link}">{@link PrivateKey}</a> object from a base64 encoded RSA private key
+     * Creates a {@link PrivateKey} object from a base64 encoded RSA private key
      *
      * @param priv_key_b64       the base64 encoded private RSA key
      *
-     * @return the generated <a href="#{@link}">{@link PrivateKey}</a>
+     * @return the generated {@link PrivateKey}
      */
     private static PrivateKey makePrivKey(String priv_key_b64) {
         try {
@@ -300,11 +300,11 @@ public class MessageEncryptor {
 
 
     /**
-     * Creates a <a href="#{@link}">{@link SecretKey}</a> object from a byte array AES key
+     * Creates a {@link SecretKey} object from a byte array AES key
      *
      * @param key_bytes         the AES key in the form of a byte array
      *
-     * @return the generated <a href="#{@link}">{@link SecretKey}</a>
+     * @return the generated {@link SecretKey}
      */
     private static SecretKey makeAESKey(byte[] key_bytes) {
         return new SecretKeySpec(key_bytes, 0, key_bytes.length, "AES");
@@ -312,11 +312,11 @@ public class MessageEncryptor {
 
 
     /**
-     * Creates a <a href="#{@link}">{@link SecretKey}</a> object from a base64 encoded AES key
+     * Creates a {@link SecretKey} object from a base64 encoded AES key
      *
      * @param key_b64           base64 encoded AES key
      *
-     * @return the generated <a href="#{@link}">{@link SecretKey}</a>
+     * @return the generated {@link SecretKey}
      */
     private static SecretKey makeAESKey(String key_b64) {
         byte[] key_bytes = Base64.decodeBase64(key_b64);

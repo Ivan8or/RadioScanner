@@ -7,10 +7,10 @@ import java.util.concurrent.Executors;
 import java.util.logging.Logger;
 
 /**
- * Handles all responding to <a href="#{@link}">{@link RadioMessage}</a> messages <p>
+ * Handles all responding to {@link RadioMessage} messages <p>
  * <p>
- * holds multiple <a href="#{@link}">{@link ReasonResponder}</a> instances<p>
- * Also holds a static instance of <a href="#{@link}">{@link ExecutorService}</a>,
+ * holds multiple {@link ReasonResponder}instances<p>
+ * Also holds a static instance of {@link ExecutorService},
  * which other RadioScanner classes use to run events asynchronously.
  *
  * @see ReasonResponder
@@ -75,7 +75,7 @@ public class WalkieTalkie {
     /**
      * gets the currently used logger
      *
-     * @return the instance of <a href="#{@link}">{@link Logger}</a> this class uses
+     * @return the instance of {@link Logger} this class uses
      */
     public static Logger getLogger() {
         return logger;
@@ -85,7 +85,7 @@ public class WalkieTalkie {
     /**
      * sets the class logger
      *
-     * @param new_logger the instance of <a href="#{@link}">{@link Logger}</a> to be used as the class logger
+     * @param new_logger the instance of {@link Logger} to be used as the class logger
      */
     public static void setLogger(Logger new_logger) {
         logger = new_logger;
@@ -111,7 +111,7 @@ public class WalkieTalkie {
 
 
     /**
-     * Gives whether or not this object is currently outputting debug statements to its <a href="#{@link}">{@link Logger}</a>
+     * Gives whether or not this object is currently outputting debug statements to its {@link Logger}
      *
      * @return if this class is in debug mode
      */
@@ -121,7 +121,7 @@ public class WalkieTalkie {
 
 
     /**
-     * Closes all listening <a href="#{@link}">{@link ReasonResponder}</a>s within this object
+     * Closes all listening {@link ReasonResponder}s within this object
      */
     public void stopListening() {
         if (debug)
@@ -133,12 +133,12 @@ public class WalkieTalkie {
 
 
     /**
-     * Adds a <a href="#{@link}">{@link ReasonResponder}</a> to this object on a certain port,
-     * allowing that responder to react to <a href="#{@link}">{@link RadioMessage}</a>s
+     * Adds a {@link ReasonResponder} to this object on a certain port,
+     * allowing that responder to react to {@link RadioMessage}s
      * sent to that port with a matching reason
      *
      * @param port      network port to listen on
-     * @param responder <a href="#{@link}">{@link ReasonResponder}</a> which responds to certain RadioMessages on the specified port
+     * @param responder {@link ReasonResponder} which responds to certain RadioMessages on the specified port
      */
     public void addResponse(int port, ReasonResponder responder) {
 

@@ -12,7 +12,7 @@ import java.util.logging.Logger;
 
 
 /**
- * Passes any incoming message on a single port to the appropriate <a href="#{@link}">{@link ReasonResponder}</a>
+ * Passes any incoming message on a single port to the appropriate {@link ReasonResponder}
  * <p>
  * The server listener for a single port
  * can contain multiple responders, one for any unique message reason
@@ -33,9 +33,9 @@ public class PortListener extends Thread {
     /**
      * Creates an empty PortListener<p>
      *
-     * @param talkie        the <a href="#{@link}">{@link WalkieTalkie}</a> instance this belongs to<p>
+     * @param talkie        the {@link WalkieTalkie} instance this belongs to<p>
      * @param port          the port this listens on
-     * @param pub_key_b64   the public RSA key to encrypt <a href="#{@link}">{@link RadioMessage}</a> replies
+     * @param pub_key_b64   the public RSA key to encrypt {@link RadioMessage} replies
      * @param priv_key_b64  the private RSA key to encrypt replies
      */
     public PortListener(WalkieTalkie talkie, int port, String pub_key_b64, String priv_key_b64) {
@@ -58,9 +58,9 @@ public class PortListener extends Thread {
 
 
     /**
-     * Adds a <a href="#{@link}">{@link ReasonResponder}</a> allowing it to reply to message recieved by this
+     * Adds a {@link ReasonResponder} allowing it to reply to message recieved by this
      *
-     * @param responder the <a href="#{@link}">{@link ReasonResponder}</a> to be added
+     * @param responder the {@link ReasonResponder} to be added
      */
     public void addResponder(ReasonResponder responder) {
         String reason = responder.getReason();
@@ -69,9 +69,9 @@ public class PortListener extends Thread {
 
 
     /**
-     * Gets all <a href="#{@link}">{@link ReasonResponder}</a> this currently holds
+     * Gets all {@link ReasonResponder} this currently holds
      *
-     * @return all contained <a href="#{@link}">{@link ReasonResponder}</a>
+     * @return all contained {@link ReasonResponder}
      */
     public Collection<ReasonResponder> getResponders() {
         return responders.values();
@@ -99,11 +99,11 @@ public class PortListener extends Thread {
 
 
     /**
-     * Picks out the appropriate <a href="#{@link}">{@link ReasonResponder}</a>
-     * and generates a reply to the incoming <a href="#{@link}">{@link RadioMessage}</a>
+     * Picks out the appropriate {@link ReasonResponder}
+     * and generates a reply to the incoming {@link RadioMessage}
      *
-     * @param message the incoming <a href="#{@link}">{@link RadioMessage}</a>
-     * @return the <a href="#{@link}">{@link ReasonResponder}</a> produced response
+     * @param message the incoming {@link RadioMessage}
+     * @return the {@link ReasonResponder} produced response
      */
     private RadioMessage respond(RadioMessage message) {
 
@@ -127,7 +127,7 @@ public class PortListener extends Thread {
 
 
     /**
-     * starts listening for <a href="#{@link}">{@link RadioMessage}</a><p>
+     * starts listening for {@link RadioMessage}<p>
      */
     @Override
     public void run() {
