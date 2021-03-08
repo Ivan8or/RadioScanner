@@ -180,13 +180,8 @@ they are only here to get the point accross that you have to use the same keypai
 
 both sending messages AND for receiving messages... common sense!
 
-to generate a *REAL* keypair you can use 
+to generate a *REAL* keypair you can use `MessageEncryptor.genRSAKeyPair()`
 
-```
-String[] keypair = MessageEncryptor.genRSAKeyPair();  //(index 0 is public, index 1 is private)
-```
-
-instead of the gibberish i'm using in this walkthrough
 
 
 ```
