@@ -20,20 +20,32 @@ BASIC DEMONSTRATION:
 ```
 public static void main(String[] args) {
 
-        // creating a new keypair... DO NOT DO THIS IN PRODUCTION!
+        // creating a new keypair
         // this is for test purposes, you would normally want to create a single keypair and store it
         // instead of making a new one each time
+        
         String[] keypair = MessageEncryptor.genRSAKeyPair();
+        
+        
 
         // creating the server side
+        
         WalkieTalkie talkie = new WalkieTalkie(keypair[0], keypair[1]);
+
+
+
 
         // adding a response to the main object
         // also setting port on which this responder listens
+        
         talkie.addResponse(25540,
                 new ReasonResponder("do_i_have_enough_animals") {
+                
+                
+                    // body of the response - this is where your own code should go!!
                     @Override
                     public RadioMessage response(RadioMessage message) {
+                    
                         RadioMessage toReturn = new RadioMessage();
 
                         String how_many_cats = message.get("cats_owned");
@@ -64,25 +76,43 @@ public static void main(String[] args) {
                 }
         );
 
+
+
         // sending a 'do_i_have_enough_animals' message from a client
+        
         RadioMessage toSend = new RadioMessage();
 
+
+
         // setting reason (key val must be 'reason'), it's special!!!
+        
         toSend.put("reason","do_i_have_enough_animals");
 
+
+
         // setting other relevant data
+        
         toSend.put("cats_owned", "2");
         toSend.put("dogs_owned", "0");
 
+
+
         // giving rsa keypair to message so it knows how to encrypt it
+        
         toSend.setRSAKeys(keypair[0], keypair[1]);
 
+
+
         // sending the message to the server and getting a future back
+        
         Future<RadioMessage> response = toSend.send("127.0.0.1", 25540);
 
-        // getting the value from the future! (
-        // will block thread, so do only if you're okay with
-        // lag since you're waiting for stuff to go over the network)
+
+
+        // getting the value from the future! 
+        // (will block thread, so do only if you're okay with
+        // waiting for stuff to go over the network)
+        
         RadioMessage response_msg = null;
         try {
             response_msg = response.get();
@@ -90,7 +120,10 @@ public static void main(String[] args) {
             e.printStackTrace();
         }
 
+
+
         // displaying results to user
+        
         String enough_cats = response_msg.get("enough_cats");
         String enough_dogs = response_msg.get("enough_dogs");
 
@@ -98,7 +131,10 @@ public static void main(String[] args) {
         System.out.println("enough cats? "+enough_cats);
         System.out.println("enough dogs? "+enough_dogs);
 
+
+
         // stop server since it will otherwise run forever
+        
         talkie.stopListening();
     }
 }
@@ -179,7 +215,6 @@ RadioMessage my_response = response_future.get();
 
 
 1.7   get values out of the response and use them for whatever 
-P.S. the keys that you pass into the #get(key) function are set on the server side
 
 ```
 String was_successful = my_response.get("success");
