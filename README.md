@@ -17,23 +17,35 @@ dependency version: 2.5.2
 BASIC DEMONSTRATION:
 =
 
-```
+```java
 public static void main(String[] args) {
 
-        // creating a new keypair... DO NOT DO THIS IN PRODUCTION!
+        // creating a new keypair
         // this is for test purposes, you would normally want to create a single keypair and store it
         // instead of making a new one each time
+        
         String[] keypair = MessageEncryptor.genRSAKeyPair();
+        
+        
 
         // creating the server side
+        
         WalkieTalkie talkie = new WalkieTalkie(keypair[0], keypair[1]);
+
+
+
 
         // adding a response to the main object
         // also setting port on which this responder listens
+        
         talkie.addResponse(25540,
                 new ReasonResponder("do_i_have_enough_animals") {
+                
+                
+                    // body of the response - this is where your own code should go!!
                     @Override
                     public RadioMessage response(RadioMessage message) {
+                    
                         RadioMessage toReturn = new RadioMessage();
 
                         String how_many_cats = message.get("cats_owned");
@@ -64,25 +76,43 @@ public static void main(String[] args) {
                 }
         );
 
+
+
         // sending a 'do_i_have_enough_animals' message from a client
+        
         RadioMessage toSend = new RadioMessage();
 
+
+
         // setting reason (key val must be 'reason'), it's special!!!
+        
         toSend.put("reason","do_i_have_enough_animals");
 
+
+
         // setting other relevant data
+        
         toSend.put("cats_owned", "2");
         toSend.put("dogs_owned", "0");
 
+
+
         // giving rsa keypair to message so it knows how to encrypt it
+        
         toSend.setRSAKeys(keypair[0], keypair[1]);
 
+
+
         // sending the message to the server and getting a future back
+        
         Future<RadioMessage> response = toSend.send("127.0.0.1", 25540);
 
-        // getting the value from the future! (
-        // will block thread, so do only if you're okay with
-        // lag since you're waiting for stuff to go over the network)
+
+
+        // getting the value from the future! 
+        // (will block thread, so do only if you're okay with
+        // waiting for stuff to go over the network)
+        
         RadioMessage response_msg = null;
         try {
             response_msg = response.get();
@@ -90,7 +120,10 @@ public static void main(String[] args) {
             e.printStackTrace();
         }
 
+
+
         // displaying results to user
+        
         String enough_cats = response_msg.get("enough_cats");
         String enough_dogs = response_msg.get("enough_dogs");
 
@@ -98,7 +131,10 @@ public static void main(String[] args) {
         System.out.println("enough cats? "+enough_cats);
         System.out.println("enough dogs? "+enough_dogs);
 
+
+
         // stop server since it will otherwise run forever
+        
         talkie.stopListening();
     }
 }
@@ -113,7 +149,7 @@ WALKTHROUGH (SENDING MESSAGES):
 
 1.1 create a new RadioMessage object passing in an RSA keypair to the constructor 
 
-```
+```java
 RadioMessage message = new RadioMessage(String rsa_key_pub, String rsa_key_priv);
 ```
 
@@ -121,7 +157,7 @@ RadioMessage message = new RadioMessage(String rsa_key_pub, String rsa_key_priv)
 
 1.2 set a reason for the message to be sent
 
-```
+```java
 message.put("reason", "do_i_have_enough_animals");
 ```
 
@@ -129,7 +165,7 @@ message.put("reason", "do_i_have_enough_animals");
 
 1.3 fill the message with any other string key-val pairs you want
 
-```
+```java
 message.put("cats_owned", "2");
 message.put("dogs_owned", "0");
 ```
@@ -144,16 +180,11 @@ they are only here to get the point accross that you have to use the same keypai
 
 both sending messages AND for receiving messages... common sense!
 
-to generate a *REAL* keypair you can use 
-
-```
-String[] keypair = MessageEncryptor.genRSAKeyPair();  //(index 0 is public, index 1 is private)
-```
-
-instead of the gibberish i'm using in this walkthrough
+to generate a *REAL* keypair you can use `MessageEncryptor.genRSAKeyPair()`
 
 
-```
+
+```java
 String rsa_public_key = "AAAAADADKAWDADWD;NOTAREALKEY";
 String rsa_private_key = "WNHEFUIWBUCLIWUCBWUK$CUBRCTVWTEFDHG;ALSONOTAREALKEY;THEREALONEISMUCHLONGER"; 
 
@@ -164,7 +195,7 @@ message.setRSAKeys(rsa_public_key, rsa_private_key);
 
 1.5 send the message to the correct IP / port
 
-```
+```java
 Future<RadioMessage> response_future = message.send("192.168.1.75", 25540);
 ```
 
@@ -172,16 +203,15 @@ Future<RadioMessage> response_future = message.send("192.168.1.75", 25540);
 
 1.6 wait for the response the server sent you back in the form of a second radio message
 
-```
+```java
 RadioMessage my_response = response_future.get();
 ```
 
 
 
 1.7   get values out of the response and use them for whatever 
-P.S. the keys that you pass into the #get(key) function are set on the server side
 
-```
+```java
 String was_successful = my_response.get("success");
 String did_i_have_enough_cats = my_response.get("enough_cats");
 String did_i_have_enough_dogs = my_response.get("enough_dogs");
@@ -196,7 +226,7 @@ WALKTHROUGH (RECEIVING / RESPONDING TO MESSAGES):
 
 2.1 create a WalkieTalkie object, with a constructor taking in your RSA public and private keys
 
-```
+```java
 String rsa_public_key = "AAAAADADKAWDADWD;NOTAREALKEY";
 String rsa_private_key = "WNHEFUIWBUCLIWUCBWUK$CUBRCTVWTEFDHG;ALSONOTAREALKEY;THEREALONEISMUCHLONGER"; 
 
@@ -207,7 +237,7 @@ WalkieTalkie talkie = new WalkieTalkie(rsa_public_key, rsa_private_key);
 
 2.2 create some classes that extend ReasonResponder for every 'reason' a message would be sent:
 
-```
+```java
 public class MyVeryOwnReasonRR extends ReasonResponder {
 
 
@@ -266,7 +296,7 @@ P.S. you also set the port on which the ReasonResponder is listening in this ste
 
 P.S. see comment 1.2 uses "do_i_have_enough_animals" as the reason a request is being sent
 
-```
+```java
 int WALKIE_PORT = 25540;
 walkie.addResponse(WALKIE_PORT,new MyVeryOwnReasonRR("do_i_have_enough_animals", this));
 ```
