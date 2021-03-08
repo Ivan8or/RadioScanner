@@ -20,16 +20,48 @@ can also generate RSA keypairs as an added benefit
 holds a single RSA keypair
  */
 
+
+
+/**
+ * Handles AES, RSA encrypting, decrypting, and RSA signing Strings<p>
+ * can also generate RSA keypairs
+ *
+ * instances hold a single RSA keypair for use in encryption
+ */
 public class MessageEncryptor {
 
     private final String PUBLIC_KEY_B64;
     private final String PRIVATE_KEY_B64;
 
+
+    /**
+     * Creates a <a href="#{@link}">{@link MessageEncryptor}</a> which uses the specified RSA keyset
+     *
+     * @param keyset_b64 array containing the base64 RSA keyset <p>(index 0 is public, index 1 is private)
+     */
+    public MessageEncryptor(String[] keyset_b64) {
+        this.PUBLIC_KEY_B64 = keyset_b64[0];
+        this.PRIVATE_KEY_B64 = keyset_b64[0];
+    }
+
+
+    /**
+     * Creates a <a href="#{@link}">{@link MessageEncryptor}</a> which uses the specified RSA keyset
+     *
+     * @param pub_key_b64       the public RSA key in base64
+     * @param priv_key_b64      the private RSA key in base64
+     */
     public MessageEncryptor(String pub_key_b64, String priv_key_b64) {
         this.PUBLIC_KEY_B64 = pub_key_b64;
         this.PRIVATE_KEY_B64 = priv_key_b64;
     }
 
+
+    /**
+     * Generates a random 2048 sized RSA keypair
+     *
+     * @return an array containing the generated keypair
+     */
     public static String[] genRSAKeyPair() {
         try {
             KeyPairGenerator generator = KeyPairGenerator.getInstance("RSA");
@@ -47,6 +79,12 @@ public class MessageEncryptor {
         return null;
     }
 
+
+    /**
+     * Generates a base64 random 128 bit AES key
+     *
+     * @return the generated base64 AES key
+     */
     public static String genAESKey() {
         try {
             KeyGenerator generator = KeyGenerator.getInstance("AES");
@@ -60,6 +98,14 @@ public class MessageEncryptor {
         return null;
     }
 
+
+    /**
+     * Signs a string using the stored RSA private key
+     *
+     * @param input         the raw string input
+     *
+     * @return the          signature encoded in base64
+     */
     public String generateSignature(String input) {
         try {
             Signature sign = Signature.getInstance("SHA256withRSA");
@@ -74,6 +120,15 @@ public class MessageEncryptor {
         }
     }
 
+
+    /**
+     * Verifies an RSA signature for a string using its RSA keyset
+     *
+     * @param input             the raw string which was signed
+     * @param signature_b64     the signature in question (encoded in base64)
+     *
+     * @return whether or not the signature is valid
+     */
     public boolean verifySignature(String input, String signature_b64) {
         try {
             Signature verifying = Signature.getInstance("SHA256withRSA");
@@ -87,6 +142,15 @@ public class MessageEncryptor {
         }
     }
 
+
+    /**
+     * Encrypts a string using a base64 AES key
+     *
+     * @param input         the raw text input
+     * @param AESKey_b64    the base64 encoded AES key to be used
+     *
+     * @return the encrypted string (encoded in base64)
+     */
     public static String encryptAES(String input, String AESKey_b64) {
         SecretKey key = makeAESKey(AESKey_b64);
         byte[] cipherText = new byte[0];
@@ -105,10 +169,17 @@ public class MessageEncryptor {
         return Base64.encodeBase64String(cipherText);
     }
 
+
+    /**
+     * Encrypts a string using the internal RSA keyset
+     *
+     * @param input         the raw text input
+     *
+     * @return the encrypted string (encoded in base64)
+     */
     public String encryptRSA(String input) {
 
         PublicKey public_key = makePubKey(PUBLIC_KEY_B64);
-        PrivateKey private_key = makePrivKey(PRIVATE_KEY_B64);
         byte[] cipherText = new byte[0];
 
         try {
@@ -128,6 +199,15 @@ public class MessageEncryptor {
         return Base64.encodeBase64String(cipherText);
     }
 
+
+    /**
+     * Decrypts a string using an AES key
+     *
+     * @param input_b64         the base64 encoded encrypted string
+     * @param key_b64           the base64 encoded AES key
+     *
+     * @return the raw decrypted string
+     */
     public static String decryptAES(String input_b64, String key_b64) {
 
         SecretKey key = makeAESKey(key_b64);
@@ -142,13 +222,19 @@ public class MessageEncryptor {
             plainText = cipher.doFinal(Base64.decodeBase64(input_b64));
 
         } catch (Exception e) {
-            System.err.println("Error decrypting... returning empty array!");
             e.printStackTrace();
-            System.err.println("Error decrypting... returned empty array!");
         }
         return new String(plainText);
     }
 
+
+    /**
+     * Decrypts a string using the internal RSA keyset
+     *
+     * @param input_b64         the base64 encoded encrypted string
+     *
+     * @return the raw decrypted string
+     */
     public String decryptRSA(String input_b64) {
 
         PrivateKey private_key = makePrivKey(PRIVATE_KEY_B64);
@@ -170,6 +256,14 @@ public class MessageEncryptor {
         return new String(plainText);
     }
 
+
+    /**
+     * Creates a <a href="#{@link}">{@link PublicKey}</a> object from a base64 encoded RSA public key
+     *
+     * @param pub_key_b64       the base64 encoded public RSA key
+     *
+     * @return the generated <a href="#{@link}">{@link PublicKey}</a>
+     */
     private static PublicKey makePubKey(String pub_key_b64) {
         try {
             KeyFactory.getInstance("RSA");
@@ -183,6 +277,14 @@ public class MessageEncryptor {
         return null;
     }
 
+
+    /**
+     * Creates a <a href="#{@link}">{@link PrivateKey}</a> object from a base64 encoded RSA private key
+     *
+     * @param priv_key_b64       the base64 encoded private RSA key
+     *
+     * @return the generated <a href="#{@link}">{@link PrivateKey}</a>
+     */
     private static PrivateKey makePrivKey(String priv_key_b64) {
         try {
             KeyFactory.getInstance("RSA");
@@ -196,10 +298,26 @@ public class MessageEncryptor {
         return null;
     }
 
+
+    /**
+     * Creates a <a href="#{@link}">{@link SecretKey}</a> object from a byte array AES key
+     *
+     * @param key_bytes         the AES key in the form of a byte array
+     *
+     * @return the generated <a href="#{@link}">{@link SecretKey}</a>
+     */
     private static SecretKey makeAESKey(byte[] key_bytes) {
         return new SecretKeySpec(key_bytes, 0, key_bytes.length, "AES");
     }
 
+
+    /**
+     * Creates a <a href="#{@link}">{@link SecretKey}</a> object from a base64 encoded AES key
+     *
+     * @param key_b64           base64 encoded AES key
+     *
+     * @return the generated <a href="#{@link}">{@link SecretKey}</a>
+     */
     private static SecretKey makeAESKey(String key_b64) {
         byte[] key_bytes = Base64.decodeBase64(key_b64);
         return makeAESKey(key_bytes);

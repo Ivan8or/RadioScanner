@@ -1,7 +1,5 @@
 package online.umbcraft.libraries;
 
-//import org.apache.log4j.Logger;
-
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -12,16 +10,17 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Logger;
 
-/*
-PortListener CLass
 
-A message listener for a single port
-can contain multiple responders, one for any unique message reason
+/**
+ * Passes any incoming message on a single port to the appropriate <a href="#{@link}">{@link ReasonResponder}</a>
+ * <p>
+ * The server listener for a single port
+ * can contain multiple responders, one for any unique message reason
  */
-
 public class PortListener extends Thread {
 
     private static final Logger logger = WalkieTalkie.getLogger();
+
     private final String RSA_PRIVATE_KEY;
     private final String RSA_PUBLIC_KEY;
     private final int PORT;
@@ -30,6 +29,15 @@ public class PortListener extends Thread {
     private Map<String, ReasonResponder> responders;
     private WalkieTalkie talkie;
 
+
+    /**
+     * Creates an empty PortListener<p>
+     *
+     * @param talkie        the <a href="#{@link}">{@link WalkieTalkie}</a> instance this belongs to<p>
+     * @param port          the port this listens on
+     * @param pub_key_b64   the public RSA key to encrypt <a href="#{@link}">{@link RadioMessage}</a> replies
+     * @param priv_key_b64  the private RSA key to encrypt replies
+     */
     public PortListener(WalkieTalkie talkie, int port, String pub_key_b64, String priv_key_b64) {
         this.talkie = talkie;
         responders = new HashMap<>(5);
@@ -38,20 +46,42 @@ public class PortListener extends Thread {
         RSA_PRIVATE_KEY = priv_key_b64;
     }
 
+
+    /**
+     * Gets the port this is listening on
+     *
+     * @return the listening port
+     */
     public int getPort() {
         return PORT;
     }
 
-    // adds a new response for a certain RadioMessage reason
+
+    /**
+     * Adds a <a href="#{@link}">{@link ReasonResponder}</a> allowing it to reply to message recieved by this
+     *
+     * @param responder the <a href="#{@link}">{@link ReasonResponder}</a> to be added
+     */
     public void addResponder(ReasonResponder responder) {
         String reason = responder.getReason();
         responders.put(reason, responder);
     }
 
+
+    /**
+     * Gets all <a href="#{@link}">{@link ReasonResponder}</a> this currently holds
+     *
+     * @return all contained <a href="#{@link}">{@link ReasonResponder}</a>
+     */
     public Collection<ReasonResponder> getResponders() {
         return responders.values();
     }
 
+
+    /**
+     * Closes the server socket on this port<p>
+     * this cannot be undone
+     */
     public void stopListening() {
 
         if (talkie.isDebugging())
@@ -67,6 +97,14 @@ public class PortListener extends Thread {
         }
     }
 
+
+    /**
+     * Picks out the appropriate <a href="#{@link}">{@link ReasonResponder}</a>
+     * and generates a reply to the incoming <a href="#{@link}">{@link RadioMessage}</a>
+     *
+     * @param message the incoming <a href="#{@link}">{@link RadioMessage}</a>
+     * @return the <a href="#{@link}">{@link ReasonResponder}</a> produced response
+     */
     private RadioMessage respond(RadioMessage message) {
 
         if (talkie.isDebugging())
@@ -77,7 +115,7 @@ public class PortListener extends Thread {
         if (responder == null)
             response = new RadioMessage()
                     .put("success", "false")
-                    .put("reason", "no_valid_reason");
+                    .put("TRANSMIT_ERROR", RadioError.NO_VALID_REASON.name());
         else
             response = responder.response(message);
 
@@ -87,8 +125,10 @@ public class PortListener extends Thread {
         return response;
     }
 
-    // starts a ServerSocket that continuously listens for radio messages, and automatically replies
-    // to any that this has a set response for (or gives a generic response to any it doesnt have)
+
+    /**
+     * starts listening for <a href="#{@link}">{@link RadioMessage}</a><p>
+     */
     @Override
     public void run() {
 
@@ -180,12 +220,10 @@ public class PortListener extends Thread {
                     }
 
                     try {
-                        if (oos != null)
-                            oos.flush();
-                        if (ois != null)
-                            ois.close();
-                        if (oos != null)
-                            oos.close();
+
+                        oos.flush();
+                        ois.close();
+                        oos.close();
 
                         clientSocket.close();
                     } catch (Exception e) {

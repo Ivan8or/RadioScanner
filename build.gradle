@@ -25,7 +25,6 @@ repositories {
 dependencies {
     implementation 'commons-codec:commons-codec:1.14'
     implementation 'com.konghq:unirest-java:3.11.02'
-    implementation 'log4j:log4j:1.2.17'
     implementation 'online.umbcraft.libraries:ProcessTimer:1.3'
 }
 

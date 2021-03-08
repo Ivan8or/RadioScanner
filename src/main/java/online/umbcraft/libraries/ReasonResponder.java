@@ -1,26 +1,41 @@
 package online.umbcraft.libraries;
 
-/*
-ReasonResponder CLass
-
-An abstract class that can be extended to allow certain RadioMessage(s) to be responded to
-the response() method takes in the received message, and returns the custom response
-only one ReasonResponder can function (on the same port) per unique message reason
+/**
+ * Responsible for responding to a single type/reason of <a href="#{@link}">{@link RadioMessage}</a><p>
+ * Extend this class to add custom logic for whenever a RadioMessage is received
+ *
+ * @see ReasonResponder
+ * @see RadioMessage
  */
 
 public abstract class ReasonResponder {
 
-    // the reason for which this responder listens
-    protected String reason;
+    protected final String reason;
 
+
+    /**
+     * Creates a blank ReasonResponder and sets the reason
+     *
+     * @param reason String which if any <a href="#{@link}">{@link RadioMessage}</a><p> share, this will reply to them
+     */
     public ReasonResponder(String reason) {
         this.reason = reason;
     }
 
-    public String getReason() {
+
+    /**
+     * Returns the <a href="#{@link}">{@link RadioMessage}</a> reason this object responds to
+     */
+    public final String getReason() {
         return reason;
     }
 
-    // generates a message to be sent in response to an incoming message request
+
+    /**
+     * generates a <a href="#{@link}">{@link RadioMessage}</a> to be sent in response to an incoming <a href="#{@link}">{@link RadioMessage}</a>
+     *
+     * @param message the incoming message
+     * @return the generated reply
+     */
     public abstract RadioMessage response(RadioMessage message);
 }
