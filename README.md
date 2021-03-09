@@ -10,14 +10,14 @@ dependency group id: online.umbcraft.libraries
 
 dependency artifact Id: RadioScanner
 
-dependency version: 2.5.2
+dependency version: 2.5.3
 
 
 
 BASIC DEMONSTRATION:
 =
 
-```java
+```Java
 public static void main(String[] args) {
 
         // creating a new keypair

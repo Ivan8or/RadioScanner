@@ -233,7 +233,8 @@ public class PortListener extends Thread {
 
             } catch (Exception e) {
                 if (server_listener.isClosed()) {
-                    logger.info("server listener is closed!");
+                    if(talkie.isDebugging())
+                        logger.info("server listener is closed!");
                     return;
                 }
                 e.printStackTrace();

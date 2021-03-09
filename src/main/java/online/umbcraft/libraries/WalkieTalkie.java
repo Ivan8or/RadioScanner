@@ -45,6 +45,16 @@ public class WalkieTalkie {
 
 
     /**
+     * Sets the shared ExecutorService to be used for async events
+     *
+     * @param executor the ExecutorService to be used by all RadioScanner classes
+     * @see ExecutorService
+     */
+    public static void setExecutor(ExecutorService executor) {
+        WalkieTalkie.executor = executor;
+    }
+
+    /**
      * Gives the shared ExecutorService used for async events
      *
      * @return the ExecutorService shared by all RadioScanner classes
