@@ -1,16 +1,16 @@
 A simplified way to have message->response java networking!
 
 
-maven repo / dependencies:
+maven repo / info:
 =
 
 repo url http://umbcraft.online:27018/repository/umbcraft-pub/
 
-dependency group id: online.umbcraft.libraries
+group id: online.umbcraft.libraries
 
-dependency artifact Id: RadioScanner
+artifact Id: RadioScanner
 
-dependency version: 2.5.2
+version: 2.5.2
 
 
 
