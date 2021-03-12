@@ -160,6 +160,7 @@ public class PortListener extends Thread {
                     } catch (Exception e) {
                         logger.severe("FAILED TO OPEN INPUT STREAMS");
                         still_fine = false;
+                        e.printStackTrace();
                     }
 
 
@@ -175,6 +176,7 @@ public class PortListener extends Thread {
                         } catch (Exception e) {
                             logger.severe("SENT MESSAGE RECEIVED BAD RESPONSE... NOT RESPONDING");
                             still_fine = false;
+                            e.printStackTrace();
                         }
                     }
 
@@ -193,6 +195,7 @@ public class PortListener extends Thread {
                         } catch (Exception e) {
                             logger.severe("SENT MESSAGE USED BAD CRYPT KEY... NOT RESPONDING");
                             still_fine = false;
+                            e.printStackTrace();
                         }
                         if (!validSignature) {
                             logger.severe("SENT MESSAGE HAS BAD SIGNATURE... NOT RESPONDING");
@@ -216,6 +219,7 @@ public class PortListener extends Thread {
                             oos.writeUTF(encryptedResponse);
                         } catch (Exception e) {
                             logger.severe("FAILED TO SEND RESPONSE ACROSS");
+                            e.printStackTrace();
                         }
                     }
 
@@ -228,6 +232,8 @@ public class PortListener extends Thread {
                         clientSocket.close();
                     } catch (Exception e) {
                         logger.severe("FAILED TO CLOSE STREAMS / SOCKET");
+                        e.printStackTrace();
+
                     }
                 });
 

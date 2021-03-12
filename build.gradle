@@ -29,14 +29,14 @@ dependencies {
 }
 
 group = 'online.umbcraft.libraries'
-version = '2.5.3'
+version = '2.5.4'
 description = 'RadioScanner'
 java.sourceCompatibility = JavaVersion.VERSION_1_8
 
 
 publishing {
     publications {
-        myJava(MavenPublication) {
+        radioscanner(MavenPublication) {
                    from components.java
                }
     }
@@ -53,16 +53,7 @@ publishing {
 }
 
 java {
-    withSourcesJar()
     withJavadocJar()
-}
-
-publishing {
-    publications {
-        maven(MavenPublication) {
-            from(components.java)
-        }
-    }
 }
 
 tasks.withType(JavaCompile) {
