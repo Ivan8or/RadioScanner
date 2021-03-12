@@ -174,7 +174,7 @@ public class PortListener extends Thread {
                             msgSignature = ois.readUTF();
                             encryptedMessage = ois.readUTF();
                         } catch (Exception e) {
-                            logger.severe("SENT MESSAGE RECEIVED BAD RESPONSE... NOT RESPONDING");
+                            logger.severe("INPUT STREAM CANT READ MESSAGE... NOT RESPONDING");
                             still_fine = false;
                             e.printStackTrace();
                         }
