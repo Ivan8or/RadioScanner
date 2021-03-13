@@ -4,7 +4,7 @@ A simplified way to have message->response java networking!
 maven repo / info:
 =
 
-repo url http://umbcraft.online:27018/repository/umbcraft-pub/
+repo url http://maven.umbcraft.online/repository/umbcraft-pub/
 
 group id: online.umbcraft.libraries
 
