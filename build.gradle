@@ -14,7 +14,7 @@ repositories {
             username = "$usr"
             password = "$pwd"
         }
-        url = uri('http://umbcraft.online:27018/repository/umbcraft-repo/')
+        url = uri('https://nexus.umbcraft.online/repository/umbcraft-repo/')
     }
 
     maven {
@@ -29,7 +29,7 @@ dependencies {
 }
 
 group = 'online.umbcraft.libraries'
-version = '2.5.4'
+version = '2.5.5'
 description = 'RadioScanner'
 java.sourceCompatibility = JavaVersion.VERSION_1_8
 
