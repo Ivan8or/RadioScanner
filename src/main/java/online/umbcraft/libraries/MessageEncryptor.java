@@ -41,7 +41,7 @@ public class MessageEncryptor {
      */
     public MessageEncryptor(String[] keyset_b64) {
         this.PUBLIC_KEY_B64 = keyset_b64[0];
-        this.PRIVATE_KEY_B64 = keyset_b64[0];
+        this.PRIVATE_KEY_B64 = keyset_b64[1];
     }
 
 
