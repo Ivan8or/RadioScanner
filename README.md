@@ -10,7 +10,7 @@ dependency group id: online.umbcraft.libraries
 
 dependency artifact Id: RadioScanner
 
-dependency version: 2.5.5
+dependency version: 2.6.1
 
 
 
@@ -24,13 +24,13 @@ public static void main(String[] args) {
         // this is for test purposes, you would normally want to create a single keypair and store it
         // instead of making a new one each time
         
-        String[] keypair = MessageEncryptor.genRSAKeyPair();
+        HelpfulRSAKeyPair keypair = new HelpfulRSAKeyPair();
         
         
 
         // creating the server side
         
-        WalkieTalkie talkie = new WalkieTalkie(keypair[0], keypair[1]);
+        WalkieTalkie talkie = new WalkieTalkie(keypair);
 
 
 
@@ -99,7 +99,7 @@ public static void main(String[] args) {
 
         // giving rsa keypair to message so it knows how to encrypt it
         
-        toSend.setRSAKeys(keypair[0], keypair[1]);
+        toSend.setRSAKeys(keypair);
 
 
 
@@ -150,7 +150,8 @@ WALKTHROUGH (SENDING MESSAGES):
 1.1 create a new RadioMessage object passing in an RSA keypair to the constructor 
 
 ```java
-RadioMessage message = new RadioMessage(String rsa_key_pub, String rsa_key_priv);
+HelpfulRSAKeyPair keypair = new HelpfulRSAKeyPair(public_key_b64, private_key_b64);
+RadioMessage message = new RadioMessage(keypair);
 ```
 
 
@@ -180,7 +181,7 @@ they are only here to get the point accross that you have to use the same keypai
 
 both sending messages AND for receiving messages... common sense!
 
-to generate a *REAL* keypair you can use `MessageEncryptor.genRSAKeyPair()`
+to generate a *REAL* keypair you can use the empty constructor from the HelpfulRSAKeyPair class `HelpfulRSAKeyPair pair = new HelpfulRSAKeyPair();`
 
 
 
@@ -188,7 +189,8 @@ to generate a *REAL* keypair you can use `MessageEncryptor.genRSAKeyPair()`
 String rsa_public_key = "AAAAADADKAWDADWD;NOTAREALKEY";
 String rsa_private_key = "WNHEFUIWBUCLIWUCBWUK$CUBRCTVWTEFDHG;ALSONOTAREALKEY;THEREALONEISMUCHLONGER"; 
 
-message.setRSAKeys(rsa_public_key, rsa_private_key);
+HelpfulRSAKeyPair pair = new HelpfulRSAKeyPair(rsa_public_key, rsa_private_key);
+message.setRSAKeys(pair);
 ```
 
 
@@ -230,7 +232,8 @@ WALKTHROUGH (RECEIVING / RESPONDING TO MESSAGES):
 String rsa_public_key = "AAAAADADKAWDADWD;NOTAREALKEY";
 String rsa_private_key = "WNHEFUIWBUCLIWUCBWUK$CUBRCTVWTEFDHG;ALSONOTAREALKEY;THEREALONEISMUCHLONGER"; 
 
-WalkieTalkie talkie = new WalkieTalkie(rsa_public_key, rsa_private_key);
+HelpfulRSAKeyPair pair = new HelpfulRSAKeyPair(rsa_public_key, rsa_private_key);
+WalkieTalkie talkie = new WalkieTalkie(pair);
 ```
 
 
