@@ -2,6 +2,9 @@ package online.umbcraft.libraries;
 
 import kong.unirest.json.JSONException;
 import kong.unirest.json.JSONObject;
+import online.umbcraft.libraries.encrypt.HelpfulAESKey;
+import online.umbcraft.libraries.encrypt.MessageEncryptor;
+import online.umbcraft.libraries.encrypt.HelpfulRSAKeyPair;
 
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -27,8 +30,7 @@ public class RadioMessage {
 
     private static final Logger logger = WalkieTalkie.getLogger();
     private JSONObject message;
-    private String RSA_PRIVATE_KEY;
-    private String RSA_PUBLIC_KEY;
+    private HelpfulRSAKeyPair RSA_PAIR;
     private boolean debug;
 
 
@@ -89,11 +91,7 @@ public class RadioMessage {
      * @return itself
      */
     public synchronized RadioMessage setRSAKeys(String public_key, String private_key) {
-        if (debug)
-            logger.info("putting RSA keys into message " + message);
-        RSA_PUBLIC_KEY = public_key;
-        RSA_PRIVATE_KEY = private_key;
-        return this;
+       return setRSAKeys(new HelpfulRSAKeyPair(public_key, private_key));
     }
 
 
@@ -104,7 +102,23 @@ public class RadioMessage {
      * @return itself
      */
     public synchronized RadioMessage setRSAKeys(String[] keys) {
-        return setRSAKeys(keys[0], keys[1]);
+        return setRSAKeys(new HelpfulRSAKeyPair(keys[0], keys[1]));
+    }
+
+
+    /**
+     * sets the RSA keys that will be used for encryption when this message is sent
+     *
+     * @param keys RSA keypair
+     * @return itself
+     */
+    public synchronized RadioMessage setRSAKeys(HelpfulRSAKeyPair keys) {
+        if (debug)
+            logger.info("putting RSA keys into message " + message);
+
+        RSA_PAIR = keys;
+        return this;
+
     }
 
 
@@ -195,7 +209,7 @@ public class RadioMessage {
      * @return A {@link Future}bcontaining the reply sent by the {@link ReasonResponder} which received the message
      */
     @Deprecated
-    public Future<RadioMessage> sendE(String IP, int port) {
+    public Future<RadioMessage> send(String IP, int port) {
 
         ProcessTimer timer = new ProcessTimer();
 
@@ -215,29 +229,28 @@ public class RadioMessage {
                         .put("TRANSMIT_ERROR", RadioError.FAILED_TO_CONNECT.name());
             }
 
-            ObjectOutputStream oos = new ObjectOutputStream(socket.getOutputStream());
-            ObjectInputStream ois = new ObjectInputStream(socket.getInputStream());
+            ObjectOutputStream dos = new ObjectOutputStream(socket.getOutputStream());
+            ObjectInputStream dis = new ObjectInputStream(socket.getInputStream());
 
-            MessageEncryptor encryptor = new MessageEncryptor(RSA_PUBLIC_KEY, RSA_PRIVATE_KEY);
-            String AESKey = MessageEncryptor.genAESKey();
-            String encryptedMessage = encryptor.encryptAES(message.toString(), AESKey);
-            String encryptedKey = encryptor.encryptRSA(AESKey);
-            String signature = encryptor.generateSignature(message.toString());
+            HelpfulAESKey AESkey = new HelpfulAESKey();
+            String encryptedMessage = MessageEncryptor.encryptAES(AESkey, message.toString());
+            String encryptedKey = MessageEncryptor.encryptRSA(RSA_PAIR, AESkey.key64());
+            String signature = MessageEncryptor.generateSignature(RSA_PAIR, message.toString());
 
             String responseKey_b64 = null;
             String responseSignature = null;
             String responseBody_b64 = null;
 
             try {
-                oos.writeUTF(encryptedKey);
-                oos.writeUTF(signature);
-                oos.writeUTF(encryptedMessage);
+                dos.writeUTF(encryptedKey);
+                dos.writeUTF(signature);
+                dos.writeUTF(encryptedMessage);
 
-                oos.flush();
+                dos.flush();
 
-                responseKey_b64 = ois.readUTF();
-                responseSignature = ois.readUTF();
-                responseBody_b64 = ois.readUTF();
+                responseKey_b64 = dis.readUTF();
+                responseSignature = dis.readUTF();
+                responseBody_b64 = dis.readUTF();
 
             } catch (Exception e) {
                 if (debug)
@@ -246,13 +259,13 @@ public class RadioMessage {
                         .put("TRANSMIT_ERROR", RadioError.BAD_NETWORK_RESPONSE.name());
             }
 
-            String resultAESKey = null;
+            HelpfulAESKey resultAESKey = null;
             String resultBody = null;
             boolean validSignature = false;
             try {
-                resultAESKey = encryptor.decryptRSA(responseKey_b64);
-                resultBody = encryptor.decryptAES(responseBody_b64, resultAESKey);
-                validSignature = encryptor.verifySignature(resultBody, responseSignature);
+                resultAESKey = new HelpfulAESKey(MessageEncryptor.decryptRSA(RSA_PAIR, responseKey_b64));
+                resultBody = MessageEncryptor.decryptAES(resultAESKey, responseBody_b64);
+                validSignature = MessageEncryptor.verifySignature(RSA_PAIR, resultBody, responseSignature);
             } catch (Exception e) {
                 if (debug)
                     logger.severe("SENT MESSAGE USED BAD CRYPT KEY... RETURNING BLANK MESSAGE");
@@ -267,8 +280,8 @@ public class RadioMessage {
                         .put("TRANSMIT_ERROR", RadioError.INVALID_SIGNATURE.name());
             }
 
-            ois.close();
-            oos.close();
+            dis.close();
+            dos.close();
             socket.close();
 
             if (debug)
@@ -287,14 +300,14 @@ public class RadioMessage {
      * @return A {@link Future} containing the reply sent by the {@link ReasonResponder} which received the message
      */
     @Deprecated
-    public Future<RadioMessage> sendE(String IP, String port) {
+    public Future<RadioMessage> send(String IP, String port) {
         int port_num = 0;
         try {
             port_num = Integer.parseInt(port);
         } catch (NumberFormatException e) {
             throw new IllegalArgumentException("Invalid address format");
         }
-        return sendE(IP, port_num);
+        return send(IP, port_num);
 
     }
 
@@ -306,7 +319,7 @@ public class RadioMessage {
      * @return A {@link Future} containing the reply sent by the {@link ReasonResponder} which received the message
      */
     @Deprecated
-    public Future<RadioMessage> sendE(String address) {
+    public Future<RadioMessage> send(String address) {
 
         String[] split = address.split(":");
 
@@ -321,43 +334,6 @@ public class RadioMessage {
             throw new IllegalArgumentException("Invalid address format");
         }
 
-        return sendE(ip, port);
+        return send(ip, port);
     }
-
-
-    /**
-     * encrypts and sends itself to a specified IP and port
-     *
-     * @param ip   the destination IPv4 address
-     * @param port the destination port
-     * @return A {@link Future} containing the reply sent by the {@link ReasonResponder} which received the message
-     */
-    public Future<RadioMessage> send(String ip, int port) {
-        return sendE(ip, port);
-    }
-
-
-    /**
-     * encrypts and sends itself to a specified IP and port
-     *
-     * @param ip   the destination IPv4 address
-     * @param port the destination port
-     * @return A {@link Future} containing the reply sent by the {@link ReasonResponder} which received the message
-     */
-    public Future<RadioMessage> send(String ip, String port) {
-        return sendE(ip, port);
-    }
-
-
-    /**
-     * encrypts and sends itself to a specified IP and port
-     *
-     * @param full_address the destination IPv4 address, made up of IP:port
-     * @return A {@link Future} containing the reply sent by the {@link ReasonResponder} which received the message
-     */
-    public Future<RadioMessage> send(String full_address) {
-        return sendE(full_address);
-    }
-
-
 }

@@ -1,5 +1,7 @@
 package online.umbcraft.libraries;
 
+import online.umbcraft.libraries.encrypt.HelpfulRSAKeyPair;
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
@@ -20,8 +22,7 @@ public class WalkieTalkie {
 
     private static Logger logger = Logger.getLogger(WalkieTalkie.class.getSimpleName());
     private static ExecutorService executor = Executors.newCachedThreadPool();
-    private final String RSA_PUBLIC_B64;
-    private final String RSA_PRIVATE_B64;
+    private HelpfulRSAKeyPair RSA_PAIR;
     private Map<Integer, PortListener> scanners;
     private boolean debug;
 
@@ -39,8 +40,39 @@ public class WalkieTalkie {
             logger.info("creating WalkieTalkie");
 
         scanners = new HashMap<>(2);
-        RSA_PUBLIC_B64 = pub_key_b64;
-        RSA_PRIVATE_B64 = priv_key_b64;
+        RSA_PAIR = new HelpfulRSAKeyPair(pub_key_b64, priv_key_b64);
+    }
+
+
+    /**
+     * Creates a blank WalkieTalkie containing RSA keypair for use in responding to messages
+     *
+     * @param keyset_b64  base 64 RSA keypair
+     * @see WalkieTalkie
+     */
+    public WalkieTalkie(String[] keyset_b64) {
+
+        if (debug)
+            logger.info("creating WalkieTalkie");
+
+        scanners = new HashMap<>(2);
+        RSA_PAIR = new HelpfulRSAKeyPair(keyset_b64);
+    }
+
+
+    /**
+     * Creates a blank WalkieTalkie containing RSA keypair for use in responding to messages
+     *
+     * @param pair  RSA keypair
+     * @see WalkieTalkie
+     */
+    public WalkieTalkie(HelpfulRSAKeyPair pair) {
+
+        if (debug)
+            logger.info("creating WalkieTalkie");
+
+        scanners = new HashMap<>(2);
+        RSA_PAIR = pair;
     }
 
 
@@ -53,6 +85,7 @@ public class WalkieTalkie {
     public static void setExecutor(ExecutorService executor) {
         WalkieTalkie.executor = executor;
     }
+
 
     /**
      * Gives the shared ExecutorService used for async events
@@ -139,7 +172,7 @@ public class WalkieTalkie {
             logger.info("adding ReasonResponder to WalkieTalkie with reason " + responder.getReason());
 
         if (scanners.get(port) == null) {
-            PortListener listener = new PortListener(this, port, RSA_PUBLIC_B64, RSA_PRIVATE_B64);
+            PortListener listener = new PortListener(this, port, RSA_PAIR);
             listener.start();
             scanners.put(port, listener);
         }

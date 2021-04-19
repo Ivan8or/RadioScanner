@@ -29,7 +29,7 @@ dependencies {
 }
 
 group = 'online.umbcraft.libraries'
-version = '2.5.5'
+version = '2.6.0'
 description = 'RadioScanner'
 java.sourceCompatibility = JavaVersion.VERSION_1_8
 
@@ -43,7 +43,7 @@ publishing {
     repositories {
         maven {
             name = "umbcraft-pub" //  optional target repository name
-            url = "http://umbcraft.online:27018/repository/umbcraft-pub/"
+            url = "https://nexus.umbcraft.online/repository/umbcraft-pub/"
             credentials {
                 username = "$usr"
                 password = "$pwd"

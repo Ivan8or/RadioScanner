@@ -1,8 +1,10 @@
 package online.umbcraft.libraries;
 
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
+import online.umbcraft.libraries.encrypt.HelpfulAESKey;
+import online.umbcraft.libraries.encrypt.MessageEncryptor;
+import online.umbcraft.libraries.encrypt.HelpfulRSAKeyPair;
+
+import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.Collection;
@@ -21,8 +23,7 @@ public class PortListener extends Thread {
 
     private static final Logger logger = WalkieTalkie.getLogger();
 
-    private final String RSA_PRIVATE_KEY;
-    private final String RSA_PUBLIC_KEY;
+    private final HelpfulRSAKeyPair RSA_PAIR;
     private final int PORT;
 
     private ServerSocket server_listener;
@@ -42,8 +43,22 @@ public class PortListener extends Thread {
         this.talkie = talkie;
         responders = new HashMap<>(5);
         this.PORT = port;
-        RSA_PUBLIC_KEY = pub_key_b64;
-        RSA_PRIVATE_KEY = priv_key_b64;
+        RSA_PAIR = new HelpfulRSAKeyPair(pub_key_b64, priv_key_b64);
+    }
+
+
+    /**
+     * Creates an empty PortListener<p>
+     *
+     * @param talkie        the {@link WalkieTalkie} instance this belongs to<p>
+     * @param port          the port this listens on
+     * @param pair   the RSA keypair used to encrypt {@link RadioMessage} replies
+     */
+    public PortListener(WalkieTalkie talkie, int port, HelpfulRSAKeyPair pair) {
+        this.talkie = talkie;
+        responders = new HashMap<>(5);
+        this.PORT = port;
+        RSA_PAIR = pair;
     }
 
 
@@ -174,31 +189,28 @@ public class PortListener extends Thread {
                             msgSignature = ois.readUTF();
                             encryptedMessage = ois.readUTF();
                         } catch (Exception e) {
-                            logger.severe("INPUT STREAM CANT READ MESSAGE... NOT RESPONDING");
+                            logger.severe("INPUT STREAM CANT READ MESSAGE");
                             still_fine = false;
                             e.printStackTrace();
                         }
                     }
 
-
-                    MessageEncryptor encryptor = null;
-                    String AESKey = null;
+                    HelpfulAESKey AESkey = null;
                     String resultBody = null;
                     boolean validSignature = false;
 
                     if (still_fine) {
                         try {
-                            encryptor = new MessageEncryptor(RSA_PUBLIC_KEY, RSA_PRIVATE_KEY);
-                            AESKey = encryptor.decryptRSA(encryptedKey);
-                            resultBody = encryptor.decryptAES(encryptedMessage, AESKey);
-                            validSignature = encryptor.verifySignature(resultBody, msgSignature);
+                            AESkey = new HelpfulAESKey(MessageEncryptor.decryptRSA(RSA_PAIR, encryptedKey));
+                            resultBody = MessageEncryptor.decryptAES(AESkey, encryptedMessage);
+                            validSignature = MessageEncryptor.verifySignature(RSA_PAIR, resultBody, msgSignature);
                         } catch (Exception e) {
-                            logger.severe("SENT MESSAGE USED BAD CRYPT KEY... NOT RESPONDING");
+                            logger.severe("SENT MESSAGE USED BAD CRYPT KEY");
                             still_fine = false;
                             e.printStackTrace();
                         }
                         if (!validSignature) {
-                            logger.severe("SENT MESSAGE HAS BAD SIGNATURE... NOT RESPONDING");
+                            logger.severe("SENT MESSAGE HAS BAD SIGNATURE");
                             still_fine = false;
                         }
                     }
@@ -206,12 +218,13 @@ public class PortListener extends Thread {
 
                     if (still_fine) {
                         RadioMessage message = new RadioMessage(resultBody);
+
                         RadioMessage response = respond(message);
 
-                        String newKey_b64 = MessageEncryptor.genAESKey();
-                        String encryptedResponse = encryptor.encryptAES(response.toString(), newKey_b64);
-                        String newEncryptedKey = encryptor.encryptRSA(newKey_b64);
-                        String newSignature = encryptor.generateSignature(response.toString());
+                        HelpfulAESKey newKey = new HelpfulAESKey();
+                        String encryptedResponse = MessageEncryptor.encryptAES(newKey, response.toString());
+                        String newEncryptedKey = MessageEncryptor.encryptRSA(RSA_PAIR, newKey.key64());
+                        String newSignature = MessageEncryptor.generateSignature(RSA_PAIR, response.toString());
 
                         try {
                             oos.writeUTF(newEncryptedKey);
