@@ -36,6 +36,12 @@ public enum RadioError {
 
 
     /**
+     *{@link RadioMessage} the json format of the response was invalid
+     */
+    INVALID_JSON,
+
+
+    /**
      *{@link RadioMessage} encountered a bad signature from the reply
      */
     INVALID_SIGNATURE;

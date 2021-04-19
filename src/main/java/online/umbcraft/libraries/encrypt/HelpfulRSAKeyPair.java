@@ -6,10 +6,16 @@ import java.security.*;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.X509EncodedKeySpec;
 
+
+/**
+ * Wrapper class for a single RSA keypair<p>
+ */
 public class HelpfulRSAKeyPair {
+
 
     private final PublicKey PUBLIC_KEY;
     private final PrivateKey PRIVATE_KEY;
+
 
     /**
      * Creates a {@link HelpfulRSAKeyPair} containing a randomly generated keypair

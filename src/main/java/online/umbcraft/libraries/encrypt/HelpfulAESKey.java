@@ -7,9 +7,14 @@ import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 import java.security.NoSuchAlgorithmException;
 
+
+/**
+ * Wrapper class for a single AES key<p>
+ */
 public class HelpfulAESKey {
 
-    private SecretKey AES_KEY;
+
+    private final SecretKey AES_KEY;
 
 
     /**
@@ -32,8 +37,6 @@ public class HelpfulAESKey {
      * Creates a {@link SecretKey} object from a base64 encoded AES key
      *
      * @param key_b64           base64 encoded AES key
-     *
-     * @return the generated {@link SecretKey}
      */
     public HelpfulAESKey(String key_b64) {
         byte[] key_bytes = Base64.decodeBase64(key_b64);

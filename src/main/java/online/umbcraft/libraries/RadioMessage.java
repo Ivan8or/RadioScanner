@@ -6,6 +6,7 @@ import online.umbcraft.libraries.encrypt.HelpfulAESKey;
 import online.umbcraft.libraries.encrypt.MessageEncryptor;
 import online.umbcraft.libraries.encrypt.HelpfulRSAKeyPair;
 
+import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
@@ -91,7 +92,7 @@ public class RadioMessage {
      * @return itself
      */
     public synchronized RadioMessage setRSAKeys(String public_key, String private_key) {
-       return setRSAKeys(new HelpfulRSAKeyPair(public_key, private_key));
+        return setRSAKeys(new HelpfulRSAKeyPair(public_key, private_key));
     }
 
 
@@ -219,18 +220,21 @@ public class RadioMessage {
 
         return WalkieTalkie.sharedExecutor().submit(() -> {
 
-            Socket socket = null;
+            final Socket socket;
+            final ObjectOutputStream oos;
+            final ObjectInputStream ois;
+
             try {
                 socket = new Socket(IP, port);
+                socket.setSoTimeout(3000);
+                oos = new ObjectOutputStream(socket.getOutputStream());
+                ois = new ObjectInputStream(socket.getInputStream());
             } catch (Exception e) {
                 if (debug)
                     logger.severe("FAILED TO CONNECT TO " + IP + ":" + port + "... RETURNING BLANK MESSAGE");
                 return new RadioMessage()
                         .put("TRANSMIT_ERROR", RadioError.FAILED_TO_CONNECT.name());
             }
-
-            ObjectOutputStream dos = new ObjectOutputStream(socket.getOutputStream());
-            ObjectInputStream dis = new ObjectInputStream(socket.getInputStream());
 
             HelpfulAESKey AESkey = new HelpfulAESKey();
             String encryptedMessage = MessageEncryptor.encryptAES(AESkey, message.toString());
@@ -242,15 +246,15 @@ public class RadioMessage {
             String responseBody_b64 = null;
 
             try {
-                dos.writeUTF(encryptedKey);
-                dos.writeUTF(signature);
-                dos.writeUTF(encryptedMessage);
+                oos.writeUTF(encryptedKey);
+                oos.writeUTF(signature);
+                oos.writeUTF(encryptedMessage);
 
-                dos.flush();
+                oos.flush();
 
-                responseKey_b64 = dis.readUTF();
-                responseSignature = dis.readUTF();
-                responseBody_b64 = dis.readUTF();
+                responseKey_b64 = ois.readUTF();
+                responseSignature = ois.readUTF();
+                responseBody_b64 = ois.readUTF();
 
             } catch (Exception e) {
                 if (debug)
@@ -262,6 +266,7 @@ public class RadioMessage {
             HelpfulAESKey resultAESKey = null;
             String resultBody = null;
             boolean validSignature = false;
+
             try {
                 resultAESKey = new HelpfulAESKey(MessageEncryptor.decryptRSA(RSA_PAIR, responseKey_b64));
                 resultBody = MessageEncryptor.decryptAES(resultAESKey, responseBody_b64);
@@ -280,14 +285,25 @@ public class RadioMessage {
                         .put("TRANSMIT_ERROR", RadioError.INVALID_SIGNATURE.name());
             }
 
-            dis.close();
-            dos.close();
+            ois.close();
+            oos.close();
             socket.close();
 
             if (debug)
                 logger.info("message to " + IP + ":" + port + " took " + timer.time() + " ms");
 
-            return new RadioMessage(resultBody);
+            RadioMessage toReturn;
+
+            try {
+                toReturn = new RadioMessage(resultBody);
+            } catch (Exception e) {
+                if (debug)
+                    logger.severe("RESULT HAD BAD JSON FORMAT");
+                return new RadioMessage()
+                        .put("TRANSMIT_ERROR", RadioError.INVALID_JSON.name())
+                        .put("json", resultBody);
+            }
+            return toReturn;
         });
     }
 
