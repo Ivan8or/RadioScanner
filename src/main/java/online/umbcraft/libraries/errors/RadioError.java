@@ -1,5 +1,8 @@
-package online.umbcraft.libraries;
+package online.umbcraft.libraries.errors;
 
+
+import online.umbcraft.libraries.RadioMessage;
+import online.umbcraft.libraries.ReasonResponder;
 
 /**
  * All possible errors which can be returned by a failed{@link RadioMessage}<p>
@@ -14,6 +17,12 @@ public enum RadioError {
      * to be able to respond to this message
      */
     NO_VALID_REASON,
+
+
+    /**
+     * the {@link ReasonResponder} errored while responding to this message
+     */
+    ERROR_ON_RESPONSE,
 
 
     /**

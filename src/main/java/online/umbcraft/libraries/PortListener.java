@@ -1,16 +1,12 @@
 package online.umbcraft.libraries;
 
-import online.umbcraft.libraries.encrypt.HelpfulAESKey;
-import online.umbcraft.libraries.encrypt.MessageEncryptor;
 import online.umbcraft.libraries.encrypt.HelpfulRSAKeyPair;
+import online.umbcraft.libraries.errors.RadioError;
 
-import javax.crypto.BadPaddingException;
 import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.net.SocketTimeoutException;
 import java.security.InvalidKeyException;
-import java.security.SignatureException;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
@@ -156,14 +152,12 @@ public class PortListener extends Thread {
         } catch (IOException e) {
             e.printStackTrace();
         }
-
         while (true) {
 
-            final Socket clientSocket;
 
+            final Socket clientSocket;
             try {
                 clientSocket = server_listener.accept();
-                clientSocket.setSoTimeout(3000);
             } catch (IOException e) {
 
                 e.printStackTrace();
@@ -173,110 +167,39 @@ public class PortListener extends Thread {
                     logger.severe("NO LONGER LISTENING ON PORT " + PORT);
                     return;
                 }
-
                 continue;
             }
 
             if (talkie.isDebugging())
                 logger.info("receiving message from IP " + clientSocket.getInetAddress());
 
-
             WalkieTalkie.sharedExecutor().submit(() -> {
 
-                final ObjectInputStream ois;
-                final ObjectOutputStream oos;
-
-                boolean still_fine = true;
-
+                final RadioSocket job;
+                RadioError error = null;
                 try {
-                    ois = new ObjectInputStream(clientSocket.getInputStream());
-                    oos = new ObjectOutputStream(clientSocket.getOutputStream());
-                } catch (IOException e) {
-                    logger.severe("FAILED TO OPEN INPUT STREAMS");
-                    still_fine = false;
-                    e.printStackTrace();
-                    return;
-                }
+                    error = RadioError.FAILED_TO_CONNECT;
+                    job = new RadioSocket(clientSocket, RSA_PAIR.pub(), RSA_PAIR.priv());
 
+                    error = RadioError.BAD_NETWORK_READ;
+                    String messageBody = job.receiveMessage();
 
-                String encryptedKey = null;
-                String msgSignature = null;
-                String encryptedMessage = null;
+                    error = RadioError.INVALID_SIGNATURE;
+                    boolean validSignature = job.verifySignature(messageBody);
+                    if (!validSignature) throw new InvalidKeyException();
 
-                if (still_fine) {
-                    try {
-                        encryptedKey = ois.readUTF();
-                        msgSignature = ois.readUTF();
-                        encryptedMessage = ois.readUTF();
-                    } catch (IOException e) {
-                        logger.severe("INPUT STREAM CANT READ MESSAGE");
-                        still_fine = false;
-                        e.printStackTrace();
-                    }
-                }
+                    error = RadioError.ERROR_ON_RESPONSE;
+                    RadioMessage response = respond(new RadioMessage(messageBody));
 
-                HelpfulAESKey AESkey = null;
-                String resultBody = null;
-                boolean validSignature = true;
+                    error = RadioError.BAD_NETWORK_WRITE;
+                    job.sendMessage(response.toString());
 
-                if (still_fine) {
-                    try {
-                        AESkey = new HelpfulAESKey(MessageEncryptor.decryptRSA(RSA_PAIR, encryptedKey));
-                        resultBody = MessageEncryptor.decryptAES(AESkey, encryptedMessage);
-                        validSignature = MessageEncryptor.verifySignature(RSA_PAIR, resultBody, msgSignature);
-                    } catch (InvalidKeyException | BadPaddingException e) {
-                        logger.severe("SENT MESSAGE USED BAD CRYPT KEY");
-                        still_fine = false;
-                    } catch (SignatureException e) {
-                        validSignature = false;
-                    }
-
-                    if (!validSignature) {
-                        logger.severe("SENT MESSAGE HAS BAD SIGNATURE");
-                        still_fine = false;
-                    }
-                }
-
-                if (still_fine) {
-                    RadioMessage message = new RadioMessage(resultBody);
-                    RadioMessage response = respond(message);
-                    HelpfulAESKey newKey = new HelpfulAESKey();
-                    String encryptedResponse = "";
-                    String newEncryptedKey = "";
-                    String newSignature = "";
-
-                    try {
-                        encryptedResponse = MessageEncryptor.encryptAES(newKey, response.toString());
-                        newEncryptedKey = MessageEncryptor.encryptRSA(RSA_PAIR, newKey.key64());
-                        newSignature = MessageEncryptor.generateSignature(RSA_PAIR, response.toString());
-                    } catch (InvalidKeyException | SignatureException e) {
-                        logger.severe("ERROR ENCRYPTING OUR MESSAGE");
-                        still_fine = false;
-                        e.printStackTrace();
-                    }
-
-                    try {
-                        oos.writeUTF(newEncryptedKey);
-                        oos.writeUTF(newSignature);
-                        oos.writeUTF(encryptedResponse);
-                    } catch (Exception e) {
-                        logger.severe("FAILED TO SEND RESPONSE ACROSS");
-                        e.printStackTrace();
-                    }
-                }
-
-                try {
-
-                    oos.flush();
-                    ois.close();
-                    oos.close();
-
-                    clientSocket.close();
+                    error = RadioError.FAILED_TO_CONNECT;
+                    job.close();
 
                 } catch (Exception e) {
-                    logger.severe("FAILED TO CLOSE STREAMS / SOCKET");
                     e.printStackTrace();
-
+                    logger.severe(error.name());
                 }
             });
 

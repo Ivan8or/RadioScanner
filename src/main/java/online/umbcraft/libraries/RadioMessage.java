@@ -2,12 +2,10 @@ package online.umbcraft.libraries;
 
 import kong.unirest.json.JSONException;
 import kong.unirest.json.JSONObject;
-import online.umbcraft.libraries.encrypt.HelpfulAESKey;
-import online.umbcraft.libraries.encrypt.MessageEncryptor;
 import online.umbcraft.libraries.encrypt.HelpfulRSAKeyPair;
+import online.umbcraft.libraries.errors.RadioError;
 
 import java.io.IOException;
-import java.net.Socket;
 import java.util.concurrent.Future;
 import java.util.logging.Logger;
 
@@ -214,39 +212,43 @@ public class RadioMessage {
 
         return WalkieTalkie.sharedExecutor().submit(() -> {
 
-            final RadioMessage toReturn = new RadioMessage();
-            final RadioSocket job;
+            RadioMessage toReturn;
+            RadioSocket job = null;
+            String responseBody = "";
+
+            RadioError error = RadioError.FAILED_TO_CONNECT;
 
             try {
                 job = new RadioSocket(IP, port, RSA_PAIR.pub(), RSA_PAIR.priv());
-            } catch (Exception e) {
-                toReturn.clear().put("TRANSMIT_ERROR", RadioError.BAD_NETWORK_WRITE.name());
-                if (debug) logger.severe(toReturn.get("TRANSMIT_ERROR"));
-                return toReturn;
-            }
 
-            try {
-
+                error = RadioError.BAD_NETWORK_WRITE;
                 job.sendMessage(message.toString());
-                toReturn.clear().put("TRANSMIT_ERROR", RadioError.BAD_NETWORK_WRITE.name());
 
-                final String responseBody = job.receiveMessage();
-                toReturn.clear().put("TRANSMIT_ERROR", RadioError.BAD_NETWORK_READ.name());
+                error = RadioError.BAD_NETWORK_READ;
+                responseBody = job.receiveMessage();
 
+                error = RadioError.INVALID_SIGNATURE;
                 job.verifySignature(responseBody);
-                toReturn.clear().put("TRANSMIT_ERROR", RadioError.INVALID_SIGNATURE.name());
 
                 if (debug) logger.info("message to " + IP + ":" + port + " took " + timer.time() + " ms");
 
-                toReturn.clear()
-                        .put("TRANSMIT_ERROR", RadioError.INVALID_JSON.name())
-                        .put("json", responseBody);
+                error = RadioError.INVALID_JSON;
+                toReturn = new RadioMessage(responseBody);
 
             } catch (Exception e) {
-                if (debug) logger.severe(toReturn.get("TRANSMIT_ERROR"));
+                if (debug) logger.severe(error.name());
+
+                toReturn = new RadioMessage()
+                    .put("TRANSMIT_ERROR", error.name());
+
+                if(error == RadioError.INVALID_JSON)
+                    toReturn.put("body", responseBody);
             }
 
-            job.close();
+            try {
+                if(job != null) job.close();
+            }catch(IOException e) { e.printStackTrace(); }
+
             return toReturn;
         });
     }

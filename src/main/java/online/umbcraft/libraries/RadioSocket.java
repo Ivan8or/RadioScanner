@@ -23,6 +23,15 @@ public class RadioSocket {
     final private PrivateKey self_priv;
 
 
+    public RadioSocket(Socket socket, PublicKey remote_pub, PrivateKey self_priv) throws IOException {
+        this.socket = socket;
+        socket.setSoTimeout(3000);
+        oos = new ObjectOutputStream(socket.getOutputStream());
+        ois = new ObjectInputStream(socket.getInputStream());
+        this.remote_pub = remote_pub;
+        this.self_priv = self_priv;
+    }
+
     public RadioSocket(final String ip, final int port, PublicKey remote_pub, PrivateKey self_priv) throws IOException {
         this.socket = new Socket(ip, port);
         socket.setSoTimeout(3000);
