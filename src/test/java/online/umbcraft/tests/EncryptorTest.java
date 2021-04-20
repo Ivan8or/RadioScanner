@@ -14,10 +14,11 @@ import java.security.SignatureException;
 public class EncryptorTest {
 
     protected String aeskey = null;
-
     protected String public_key = null;
     protected String private_key = null;
+
     protected String message = null;
+
     protected String message_sig = null;
     protected String message_rsa = null;
     protected String message_aes = null;
@@ -113,7 +114,6 @@ public class EncryptorTest {
         Assert.assertEquals(result, message);
     }
 
-
     @Test
     public void signatureGenerate() {
         HelpfulRSAKeyPair pair = new HelpfulRSAKeyPair(public_key, private_key);
@@ -129,7 +129,7 @@ public class EncryptorTest {
     }
 
     @Test
-    public void signatureCheck() {
+    public void signatureVerify() {
 
         HelpfulRSAKeyPair pair = new HelpfulRSAKeyPair(public_key, private_key);
 
@@ -139,7 +139,27 @@ public class EncryptorTest {
         } catch (InvalidKeyException | SignatureException e) {
             e.printStackTrace();
         }
+
         Assert.assertTrue(result);
     }
+
+
+    @Test
+    public void signatureGenerateVerify() {
+
+        HelpfulRSAKeyPair pair = new HelpfulRSAKeyPair(public_key, private_key);
+
+        boolean result = false;
+        try {
+            String sig = MessageEncryptor.generateSignature(pair, message);
+            result = MessageEncryptor.verifySignature(pair, message, sig);
+        } catch (InvalidKeyException | SignatureException e) {
+            e.printStackTrace();
+        }
+
+        Assert.assertTrue(result);
+    }
+
+
 
 }

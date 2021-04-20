@@ -1,5 +1,8 @@
-package online.umbcraft.libraries;
+package online.umbcraft.libraries.errors;
 
+
+import online.umbcraft.libraries.message.RadioMessage;
+import online.umbcraft.libraries.ReasonResponder;
 
 /**
  * All possible errors which can be returned by a failed{@link RadioMessage}<p>
@@ -17,21 +20,39 @@ public enum RadioError {
 
 
     /**
+     * the {@link ReasonResponder} errored while responding to this message
+     */
+    ERROR_ON_RESPONSE,
+
+
+    /**
      * {@link RadioMessage} failed to connect to the specified IPv4 address
      */
     FAILED_TO_CONNECT,
 
 
     /**
-     * {@link RadioMessage} encountered an issue with reading / writing to the socket
+     * {@link RadioMessage} encountered an issue with reading from the socket
      */
-    BAD_NETWORK_RESPONSE,
+    BAD_NETWORK_READ,
 
 
     /**
-     * {@link RadioMessage} was not able to decrypt the reply with its RSA key
+     * {@link RadioMessage} encountered an issue with writing to the socket
      */
-    BAD_RSA_KEY,
+    BAD_NETWORK_WRITE,
+
+
+    /**
+     * {@link RadioMessage} was not able to decrypt the reply with its RSA / AES key
+     */
+    BAD_CRYPT_KEY,
+
+
+    /**
+     * the public key of the remote message is not familiar
+     */
+    UNKNOWN_HOST,
 
 
     /**

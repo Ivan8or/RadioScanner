@@ -2,6 +2,8 @@ package online.umbcraft.libraries.encrypt;
 
 import org.apache.commons.codec.binary.Base64;
 
+import java.io.UnsupportedEncodingException;
+import java.math.BigInteger;
 import java.security.*;
 import javax.crypto.*;
 
@@ -12,7 +14,7 @@ public class MessageEncryptor {
 
 
     /**
-     * Signs a string using the stored RSA private key
+     * Signs (the hash of) a string using the stored RSA private key
      *
      * @param pair  the RSA keypair from which the private key is used to make the signature
      * @param input the raw string input
@@ -24,7 +26,7 @@ public class MessageEncryptor {
 
 
     /**
-     * Signs a string using the stored RSA private key
+     * Signs (the hash of) a string using the stored RSA private key
      *
      * @param key   the private RSA key used to make the signature
      * @param input the raw string input
@@ -46,7 +48,7 @@ public class MessageEncryptor {
 
 
     /**
-     * Verifies an RSA signature for a string using its RSA keyset
+     * Verifies an RSA signature for (the hash of) a string using its RSA keyset
      *
      * @param pair          the RSA keypair from which the public key is used to verify the signature
      * @param input         the raw string which was signed
@@ -54,21 +56,12 @@ public class MessageEncryptor {
      * @return whether or not the signature is valid
      */
     public static boolean verifySignature(HelpfulRSAKeyPair pair, String input, String signature_b64) throws InvalidKeyException, SignatureException {
-        try {
-            Signature verifying = Signature.getInstance("SHA256withRSA");
-            verifying.initVerify(pair.pub());
-            verifying.update(input.getBytes());
-
-            return verifying.verify(Base64.decodeBase64(signature_b64));
-        } catch (NoSuchAlgorithmException e) {
-            e.printStackTrace();
-            return false;
-        }
+        return verifySignature(pair.pub(), input, signature_b64);
     }
 
 
     /**
-     * Verifies an RSA signature for a string using its RSA keyset
+     * Verifies an RSA signature for (the hash of) a string using its RSA keyset
      *
      * @param key           the public key used to verify the signature
      * @param input         the raw string which was signed
@@ -120,12 +113,24 @@ public class MessageEncryptor {
      * Encrypts a string using the internal RSA keyset
      *
      * @param input the raw text input
-     * @param pair the RSA keypair from which the public key will be used to encrypt
+     * @param pair  the RSA keypair from which the public key will be used to encrypt
      * @return the encrypted string (encoded in base64)
      */
     public static String encryptRSA(HelpfulRSAKeyPair pair, String input) throws InvalidKeyException {
+        return encryptRSA(pair.pub(), input);
+    }
 
-        PublicKey public_key = pair.pub();
+
+    /**
+     * Encrypts a string using the internal RSA keyset
+     *
+     * @param input the raw text input
+     * @param key   the RSA key used to encrypt the message
+     * @return the encrypted string (encoded in base64)
+     */
+    public static String encryptRSA(PublicKey key, String input) throws InvalidKeyException {
+
+        PublicKey public_key = key;
         byte[] cipherText = new byte[0];
 
         try {
@@ -175,19 +180,30 @@ public class MessageEncryptor {
     /**
      * Decrypts a string using the internal RSA keyset
      *
+     * @param pair      the keypair containing the private key to be used to decrypt
      * @param input_b64 the base64 encoded encrypted string
      * @return the raw decrypted string
      */
     public static String decryptRSA(HelpfulRSAKeyPair pair, String input_b64) throws InvalidKeyException, BadPaddingException {
+        return decryptRSA(pair.priv(), input_b64);
+    }
 
-        PrivateKey private_key = pair.priv();
+
+    /**
+     * Decrypts a string using the internal RSA keyset
+     *
+     * @param key       the private RSA key to be used to decrypt
+     * @param input_b64 the base64 encoded encrypted string
+     * @return the raw decrypted string
+     */
+    public static String decryptRSA(PrivateKey key, String input_b64) throws InvalidKeyException, BadPaddingException {
+
+        PrivateKey private_key = key;
         byte[] plainText = new byte[0];
 
         try {
             Cipher cipher = Cipher.getInstance("RSA/ECB/PKCS1Padding");
-
             cipher.init(Cipher.DECRYPT_MODE, private_key);
-
 
             plainText = cipher.doFinal(Base64.decodeBase64(input_b64));
 

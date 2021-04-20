@@ -1,16 +1,17 @@
 package online.umbcraft.libraries;
 
-import online.umbcraft.libraries.encrypt.HelpfulAESKey;
-import online.umbcraft.libraries.encrypt.MessageEncryptor;
 import online.umbcraft.libraries.encrypt.HelpfulRSAKeyPair;
+import online.umbcraft.libraries.errors.RadioError;
+import online.umbcraft.libraries.message.RadioMessage;
+import online.umbcraft.libraries.message.ReasonMessage;
+import online.umbcraft.libraries.message.ResponseMessage;
 
-import javax.crypto.BadPaddingException;
 import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.net.SocketTimeoutException;
 import java.security.InvalidKeyException;
-import java.security.SignatureException;
+import java.security.PrivateKey;
+import java.security.PublicKey;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
@@ -27,7 +28,6 @@ public class PortListener extends Thread {
 
     private static final Logger logger = WalkieTalkie.getLogger();
 
-    private final HelpfulRSAKeyPair RSA_PAIR;
     private final int PORT;
 
     private ServerSocket server_listener;
@@ -40,29 +40,11 @@ public class PortListener extends Thread {
      *
      * @param talkie       the {@link WalkieTalkie} instance this belongs to<p>
      * @param port         the port this listens on
-     * @param pub_key_b64  the public RSA key to encrypt {@link RadioMessage} replies
-     * @param priv_key_b64 the private RSA key to encrypt replies
      */
-    public PortListener(WalkieTalkie talkie, int port, String pub_key_b64, String priv_key_b64) {
+    public PortListener(WalkieTalkie talkie, int port) {
         this.talkie = talkie;
         responders = new HashMap<>(5);
         this.PORT = port;
-        RSA_PAIR = new HelpfulRSAKeyPair(pub_key_b64, priv_key_b64);
-    }
-
-
-    /**
-     * Creates an empty PortListener<p>
-     *
-     * @param talkie the {@link WalkieTalkie} instance this belongs to<p>
-     * @param port   the port this listens on
-     * @param pair   the RSA keypair used to encrypt {@link RadioMessage} replies
-     */
-    public PortListener(WalkieTalkie talkie, int port, HelpfulRSAKeyPair pair) {
-        this.talkie = talkie;
-        responders = new HashMap<>(5);
-        this.PORT = port;
-        RSA_PAIR = pair;
     }
 
 
@@ -124,19 +106,13 @@ public class PortListener extends Thread {
      * @param message the incoming {@link RadioMessage}
      * @return the {@link ReasonResponder} produced response
      */
-    private RadioMessage respond(RadioMessage message) {
+    private ResponseMessage respond(ReasonMessage message) {
 
         if (talkie.isDebugging())
             logger.info("responding to message " + message);
 
         ReasonResponder responder = responders.get(message.get("reason"));
-        RadioMessage response;
-        if (responder == null)
-            response = new RadioMessage()
-                    .put("success", "false")
-                    .put("TRANSMIT_ERROR", RadioError.NO_VALID_REASON.name());
-        else
-            response = responder.response(message);
+        ResponseMessage response = responder.response(message);
 
         if (talkie.isDebugging())
             logger.info("response is " + response);
@@ -146,7 +122,7 @@ public class PortListener extends Thread {
 
 
     /**
-     * starts listening for {@link RadioMessage}<p>
+     * starts listening for {@link RadioMessage}s and responds with {@link ReasonResponder}s<p>
      */
     @Override
     public void run() {
@@ -156,14 +132,12 @@ public class PortListener extends Thread {
         } catch (IOException e) {
             e.printStackTrace();
         }
-
         while (true) {
 
             final Socket clientSocket;
 
             try {
                 clientSocket = server_listener.accept();
-                clientSocket.setSoTimeout(3000);
             } catch (IOException e) {
 
                 e.printStackTrace();
@@ -173,114 +147,61 @@ public class PortListener extends Thread {
                     logger.severe("NO LONGER LISTENING ON PORT " + PORT);
                     return;
                 }
-
                 continue;
             }
 
             if (talkie.isDebugging())
                 logger.info("receiving message from IP " + clientSocket.getInetAddress());
 
-
             WalkieTalkie.sharedExecutor().submit(() -> {
 
-                final ObjectInputStream ois;
-                final ObjectOutputStream oos;
-
-                boolean still_fine = true;
-
+                final RadioSocket job;
+                RadioError error = RadioError.FAILED_TO_CONNECT;
                 try {
-                    ois = new ObjectInputStream(clientSocket.getInputStream());
-                    oos = new ObjectOutputStream(clientSocket.getOutputStream());
-                } catch (IOException e) {
-                    logger.severe("FAILED TO OPEN INPUT STREAMS");
-                    still_fine = false;
-                    e.printStackTrace();
-                    return;
-                }
+                    job = new RadioSocket(clientSocket);
 
+                    error = RadioError.BAD_NETWORK_READ;
+                    job.receiveRemote();
 
-                String encryptedKey = null;
-                String msgSignature = null;
-                String encryptedMessage = null;
+                    error = RadioError.NO_VALID_REASON;
+                    ReasonResponder responder = responders.get(job.getRemoteReason());
+                    if (responder == null) throw new IllegalStateException();
 
-                if (still_fine) {
-                    try {
-                        encryptedKey = ois.readUTF();
-                        msgSignature = ois.readUTF();
-                        encryptedMessage = ois.readUTF();
-                    } catch (IOException e) {
-                        logger.severe("INPUT STREAM CANT READ MESSAGE");
-                        still_fine = false;
-                        e.printStackTrace();
-                    }
-                }
+                    error = RadioError.UNKNOWN_HOST;
+                    if(!responder.isKnown(job.getRemotePub())) throw new IllegalStateException();
 
-                HelpfulAESKey AESkey = null;
-                String resultBody = null;
-                boolean validSignature = true;
+                    HelpfulRSAKeyPair selfPair = responders.get(job.getRemoteReason()).getKeypair();
+                    PublicKey remotePub = HelpfulRSAKeyPair.publicFrom64(job.getRemotePub());
 
-                if (still_fine) {
-                    try {
-                        AESkey = new HelpfulAESKey(MessageEncryptor.decryptRSA(RSA_PAIR, encryptedKey));
-                        resultBody = MessageEncryptor.decryptAES(AESkey, encryptedMessage);
-                        validSignature = MessageEncryptor.verifySignature(RSA_PAIR, resultBody, msgSignature);
-                    } catch (InvalidKeyException | BadPaddingException e) {
-                        logger.severe("SENT MESSAGE USED BAD CRYPT KEY");
-                        still_fine = false;
-                    } catch (SignatureException e) {
-                        validSignature = false;
-                    }
+                    error = RadioError.BAD_CRYPT_KEY;
+                    job.decodeRemote(selfPair.priv());
 
-                    if (!validSignature) {
-                        logger.severe("SENT MESSAGE HAS BAD SIGNATURE");
-                        still_fine = false;
-                    }
-                }
+                    error = RadioError.INVALID_SIGNATURE;
+                    if (!job.verifyRemoteSignature(remotePub)) throw new InvalidKeyException();
 
-                if (still_fine) {
-                    RadioMessage message = new RadioMessage(resultBody);
-                    RadioMessage response = respond(message);
-                    HelpfulAESKey newKey = new HelpfulAESKey();
-                    String encryptedResponse = "";
-                    String newEncryptedKey = "";
-                    String newSignature = "";
+                    error = RadioError.INVALID_JSON;
+                    ReasonMessage message = new ReasonMessage(job.getRemoteBody());
 
-                    try {
-                        encryptedResponse = MessageEncryptor.encryptAES(newKey, response.toString());
-                        newEncryptedKey = MessageEncryptor.encryptRSA(RSA_PAIR, newKey.key64());
-                        newSignature = MessageEncryptor.generateSignature(RSA_PAIR, response.toString());
-                    } catch (InvalidKeyException | SignatureException e) {
-                        logger.severe("ERROR ENCRYPTING OUR MESSAGE");
-                        still_fine = false;
-                        e.printStackTrace();
-                    }
+                    error = RadioError.ERROR_ON_RESPONSE;
+                    ResponseMessage response = respond(message);
 
-                    try {
-                        oos.writeUTF(newEncryptedKey);
-                        oos.writeUTF(newSignature);
-                        oos.writeUTF(encryptedResponse);
-                    } catch (Exception e) {
-                        logger.severe("FAILED TO SEND RESPONSE ACROSS");
-                        e.printStackTrace();
-                    }
-                }
+                    error = RadioError.INVALID_JSON;
+                    job.setMessage(response.json(), "", selfPair.pub64());
 
-                try {
+                    error = RadioError.BAD_CRYPT_KEY;
+                    job.encodeMessage(remotePub, selfPair.priv());
 
-                    oos.flush();
-                    ois.close();
-                    oos.close();
+                    error = RadioError.BAD_NETWORK_WRITE;
+                    job.sendMessage();
 
-                    clientSocket.close();
+                    error = RadioError.FAILED_TO_CONNECT;
+                    job.close();
 
                 } catch (Exception e) {
-                    logger.severe("FAILED TO CLOSE STREAMS / SOCKET");
                     e.printStackTrace();
-
+                    logger.severe("ERROR VALUE: " + error.name() + " - " + e.getClass().getSimpleName());
                 }
             });
-
-
         }
     }
 }

@@ -1,9 +1,9 @@
 package online.umbcraft.libraries;
 
-import online.umbcraft.libraries.encrypt.HelpfulRSAKeyPair;
+import online.umbcraft.libraries.message.RadioMessage;
 
-import java.util.HashMap;
 import java.util.Map;
+import java.util.TreeMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.logging.Logger;
@@ -23,57 +23,18 @@ public class WalkieTalkie {
 
     private static Logger logger = Logger.getLogger(WalkieTalkie.class.getSimpleName());
     private static ExecutorService executor = Executors.newCachedThreadPool();
-    private HelpfulRSAKeyPair RSA_PAIR;
     private Map<Integer, PortListener> scanners;
     private boolean debug;
 
 
     /**
-     * Creates a blank WalkieTalkie containing RSA keypair for use in responding to messages
+     * Creates a blank WalkieTalkie
      *
-     * @param pub_key_b64  base 64 public RSA key
-     * @param priv_key_b64 base 64 private RSA key
      * @see WalkieTalkie
      */
-    public WalkieTalkie(String pub_key_b64, String priv_key_b64) {
+    public WalkieTalkie() {
 
-        if (debug)
-            logger.info("creating WalkieTalkie");
-
-        scanners = new HashMap<>(2);
-        RSA_PAIR = new HelpfulRSAKeyPair(pub_key_b64, priv_key_b64);
-    }
-
-
-    /**
-     * Creates a blank WalkieTalkie containing RSA keypair for use in responding to messages
-     *
-     * @param keyset_b64 base 64 RSA keypair
-     * @see WalkieTalkie
-     */
-    public WalkieTalkie(String[] keyset_b64) {
-
-        if (debug)
-            logger.info("creating WalkieTalkie");
-
-        scanners = new HashMap<>(2);
-        RSA_PAIR = new HelpfulRSAKeyPair(keyset_b64);
-    }
-
-
-    /**
-     * Creates a blank WalkieTalkie containing RSA keypair for use in responding to messages
-     *
-     * @param pair RSA keypair
-     * @see WalkieTalkie
-     */
-    public WalkieTalkie(HelpfulRSAKeyPair pair) {
-
-        if (debug)
-            logger.info("creating WalkieTalkie");
-
-        scanners = new HashMap<>(2);
-        RSA_PAIR = pair;
+        scanners = new TreeMap<>();
     }
 
 
@@ -172,8 +133,8 @@ public class WalkieTalkie {
         if (debug)
             logger.info("adding ReasonResponder to WalkieTalkie with reason " + responder.getReason());
 
-        if (scanners.get(port) == null) {
-            PortListener listener = new PortListener(this, port, RSA_PAIR);
+        if (!scanners.containsKey(port)) {
+            PortListener listener = new PortListener(this, port);
             listener.start();
             scanners.put(port, listener);
         }

@@ -39,19 +39,6 @@ public class HelpfulRSAKeyPair {
 
 
     /**
-     * Creates a {@link HelpfulRSAKeyPair} containing the specified keypair
-     *
-     * @param keypair an RSA keypair array encoded in base64
-     *                (index 0 is public, index 1 is private)
-     */
-    public HelpfulRSAKeyPair(String[] keypair) {
-
-        PUBLIC_KEY = publicFrom64(keypair[0]);
-        PRIVATE_KEY = privateFrom64(keypair[1]);
-    }
-
-
-    /**
      * Creates a {@link HelpfulRSAKeyPair} containing the specified keyset
      *
      * @param pub_key_b64  the public RSA key encoded in base64
