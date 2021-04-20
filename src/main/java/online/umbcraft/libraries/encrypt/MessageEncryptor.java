@@ -178,6 +178,7 @@ public class MessageEncryptor {
     /**
      * Decrypts a string using the internal RSA keyset
      *
+     * @param pair the keypair containing the private key to be used to decrypt
      * @param input_b64 the base64 encoded encrypted string
      * @return the raw decrypted string
      */
@@ -189,6 +190,7 @@ public class MessageEncryptor {
     /**
      * Decrypts a string using the internal RSA keyset
      *
+     * @param key the private RSA key to be used to decrypt
      * @param input_b64 the base64 encoded encrypted string
      * @return the raw decrypted string
      */

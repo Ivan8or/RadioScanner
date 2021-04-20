@@ -13,6 +13,13 @@ import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.SignatureException;
 
+
+/**
+ * Handles socket reads and writes for the {@link RadioMessage} and {@link PortListener} classes
+ * <p>
+ * A single socket used for a single transaction between client and server
+ * encrypts the message as it sends it across
+ */
 public class RadioSocket {
 
     final private Socket socket;
@@ -23,6 +30,13 @@ public class RadioSocket {
     final private PrivateKey self_priv;
 
 
+    /**
+     * Creates a RadioSocket from a Socket, and assigns it a remove public key and own private key to use while encrypting
+     *
+     * @param socket Socket object to be used for the transaction
+     * @param remote_pub remote socket's public key, to be used for encrypting our message
+     * @param self_priv our socket's private key, to be used for decrypting their message
+     */
     public RadioSocket(Socket socket, PublicKey remote_pub, PrivateKey self_priv) throws IOException {
         this.socket = socket;
         socket.setSoTimeout(3000);
@@ -32,6 +46,16 @@ public class RadioSocket {
         this.self_priv = self_priv;
     }
 
+
+    /**
+     * Creates a RadioSocket using an IP and port number
+     * assigns it a remove public key and own private key to use while encrypting
+     *
+     * @param ip the IP to connect to
+     * @param port the port to connect to
+     * @param remote_pub remote socket's public key, to be used for encrypting our message
+     * @param self_priv our socket's private key, to be used for decrypting their message
+     */
     public RadioSocket(final String ip, final int port, PublicKey remote_pub, PrivateKey self_priv) throws IOException {
         this.socket = new Socket(ip, port);
         socket.setSoTimeout(3000);
@@ -42,6 +66,11 @@ public class RadioSocket {
     }
 
 
+    /**
+     * Encrypts and sends a message to the destination port
+     *
+     * @param to_write the body of the message to be transmitted
+     */
     public void sendMessage(String to_write) throws InvalidKeyException, SignatureException, IOException {
         HelpfulAESKey AESkey = new HelpfulAESKey();
 
@@ -53,6 +82,11 @@ public class RadioSocket {
     }
 
 
+    /**
+     * receives and decrypts a message from the remote port
+     *
+     * @return the body of the received message
+     */
     public String receiveMessage() throws IOException, BadPaddingException, InvalidKeyException {
 
         HelpfulAESKey aeskey = new HelpfulAESKey(MessageEncryptor.decryptRSA(self_priv, ois.readUTF()));
@@ -61,10 +95,21 @@ public class RadioSocket {
     }
 
 
+    /**
+     * reeives and verifies an RSA signature of a body of text
+     *
+     * @param body the raw body to be verified against the signature
+     *
+     * @return whether the signature is valid
+     */
     public Boolean verifySignature(String body) throws IOException, SignatureException, InvalidKeyException {
         return MessageEncryptor.verifySignature(remote_pub, body, ois.readUTF());
     }
 
+
+    /**
+     * closes all streams / sockets used by this object
+     */
     public void close() throws IOException {
         oos.close();
         ois.close();

@@ -142,7 +142,7 @@ public class PortListener extends Thread {
 
 
     /**
-     * starts listening for {@link RadioMessage}<p>
+     * starts listening for {@link RadioMessage}s and responds with {@link ReasonResponder}s<p>
      */
     @Override
     public void run() {
