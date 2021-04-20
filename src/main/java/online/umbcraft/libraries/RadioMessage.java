@@ -7,8 +7,6 @@ import online.umbcraft.libraries.encrypt.MessageEncryptor;
 import online.umbcraft.libraries.encrypt.HelpfulRSAKeyPair;
 
 import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 import java.net.Socket;
 import java.util.concurrent.Future;
 import java.util.logging.Logger;
@@ -76,8 +74,7 @@ public class RadioMessage {
      * @return itself
      */
     public RadioMessage put(String key, String val) {
-        if (debug)
-            logger.info("inserting " + key + " = " + val + " into message " + message);
+        if (debug) logger.info("inserting " + key + " = " + val + " into message " + message);
 
         message.put(key, val);
         return this;
@@ -114,8 +111,7 @@ public class RadioMessage {
      * @return itself
      */
     public synchronized RadioMessage setRSAKeys(HelpfulRSAKeyPair keys) {
-        if (debug)
-            logger.info("putting RSA keys into message " + message);
+        if (debug) logger.info("putting RSA keys into message " + message);
 
         RSA_PAIR = keys;
         return this;
@@ -132,15 +128,14 @@ public class RadioMessage {
      * @return itself
      */
     public RadioMessage merge(RadioMessage other) {
-        if (debug)
-            logger.info("merging message " + message + " with message " + other + "...");
+        if (debug) logger.info("merging message " + message + " with message " + other + "...");
 
         for (String key : other.message.toMap().keySet())
             if (!message.has(key))
                 message.put(key, other.get(key));
 
-        if (debug)
-            logger.info("resulting message: " + message);
+        if (debug) logger.info("resulting message: " + message);
+
         return this;
     }
 
@@ -219,89 +214,39 @@ public class RadioMessage {
 
         return WalkieTalkie.sharedExecutor().submit(() -> {
 
-            final Socket socket;
-            final ObjectOutputStream oos;
-            final ObjectInputStream ois;
+            final RadioMessage toReturn = new RadioMessage();
+            final RadioSocket job;
 
             try {
-                socket = new Socket(IP, port);
-                socket.setSoTimeout(3000);
-                oos = new ObjectOutputStream(socket.getOutputStream());
-                ois = new ObjectInputStream(socket.getInputStream());
+                job = new RadioSocket(IP, port, RSA_PAIR.pub(), RSA_PAIR.priv());
             } catch (Exception e) {
-                if (debug)
-                    logger.severe("FAILED TO CONNECT TO " + IP + ":" + port + "... RETURNING BLANK MESSAGE");
-                return new RadioMessage()
-                        .put("TRANSMIT_ERROR", RadioError.FAILED_TO_CONNECT.name());
+                toReturn.clear().put("TRANSMIT_ERROR", RadioError.BAD_NETWORK_WRITE.name());
+                if (debug) logger.severe(toReturn.get("TRANSMIT_ERROR"));
+                return toReturn;
             }
-
-            HelpfulAESKey AESkey = new HelpfulAESKey();
-            String encryptedMessage = MessageEncryptor.encryptAES(AESkey, message.toString());
-            String encryptedKey = MessageEncryptor.encryptRSA(RSA_PAIR, AESkey.key64());
-            String signature = MessageEncryptor.generateSignature(RSA_PAIR, message.toString());
-
-            String responseKey_b64 = null;
-            String responseSignature = null;
-            String responseBody_b64 = null;
 
             try {
-                oos.writeUTF(encryptedKey);
-                oos.writeUTF(signature);
-                oos.writeUTF(encryptedMessage);
 
-                oos.flush();
+                job.sendMessage(message.toString());
+                toReturn.clear().put("TRANSMIT_ERROR", RadioError.BAD_NETWORK_WRITE.name());
 
-                responseKey_b64 = ois.readUTF();
-                responseSignature = ois.readUTF();
-                responseBody_b64 = ois.readUTF();
+                final String responseBody = job.receiveMessage();
+                toReturn.clear().put("TRANSMIT_ERROR", RadioError.BAD_NETWORK_READ.name());
 
-            } catch (Exception e) {
-                if (debug)
-                    logger.severe("MESSAGE FAILED STREAM READ/WRITE");
-                return new RadioMessage()
-                        .put("TRANSMIT_ERROR", RadioError.BAD_NETWORK_RESPONSE.name());
-            }
+                job.verifySignature(responseBody);
+                toReturn.clear().put("TRANSMIT_ERROR", RadioError.INVALID_SIGNATURE.name());
 
-            HelpfulAESKey resultAESKey = null;
-            String resultBody = null;
-            boolean validSignature = false;
+                if (debug) logger.info("message to " + IP + ":" + port + " took " + timer.time() + " ms");
 
-            try {
-                resultAESKey = new HelpfulAESKey(MessageEncryptor.decryptRSA(RSA_PAIR, responseKey_b64));
-                resultBody = MessageEncryptor.decryptAES(resultAESKey, responseBody_b64);
-                validSignature = MessageEncryptor.verifySignature(RSA_PAIR, resultBody, responseSignature);
-            } catch (Exception e) {
-                if (debug)
-                    logger.severe("SENT MESSAGE USED BAD CRYPT KEY... RETURNING BLANK MESSAGE");
-                return new RadioMessage()
-                        .put("TRANSMIT_ERROR", RadioError.BAD_RSA_KEY.name());
-            }
-
-            if (!validSignature) {
-                if (debug)
-                    logger.severe("SENT MESSAGE HAS BAD SIGNATURE... RETURNING BLANK MESSAGE");
-                return new RadioMessage()
-                        .put("TRANSMIT_ERROR", RadioError.INVALID_SIGNATURE.name());
-            }
-
-            ois.close();
-            oos.close();
-            socket.close();
-
-            if (debug)
-                logger.info("message to " + IP + ":" + port + " took " + timer.time() + " ms");
-
-            RadioMessage toReturn;
-
-            try {
-                toReturn = new RadioMessage(resultBody);
-            } catch (Exception e) {
-                if (debug)
-                    logger.severe("RESULT HAD BAD JSON FORMAT");
-                return new RadioMessage()
+                toReturn.clear()
                         .put("TRANSMIT_ERROR", RadioError.INVALID_JSON.name())
-                        .put("json", resultBody);
+                        .put("json", responseBody);
+
+            } catch (Exception e) {
+                if (debug) logger.severe(toReturn.get("TRANSMIT_ERROR"));
             }
+
+            job.close();
             return toReturn;
         });
     }

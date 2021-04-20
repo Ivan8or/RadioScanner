@@ -23,9 +23,15 @@ public enum RadioError {
 
 
     /**
-     * {@link RadioMessage} encountered an issue with reading / writing to the socket
+     * {@link RadioMessage} encountered an issue with reading from the socket
      */
-    BAD_NETWORK_RESPONSE,
+    BAD_NETWORK_READ,
+
+
+    /**
+     * {@link RadioMessage} encountered an issue with writing to the socket
+     */
+    BAD_NETWORK_WRITE,
 
 
     /**

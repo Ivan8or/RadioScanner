@@ -54,16 +54,7 @@ public class MessageEncryptor {
      * @return whether or not the signature is valid
      */
     public static boolean verifySignature(HelpfulRSAKeyPair pair, String input, String signature_b64) throws InvalidKeyException, SignatureException {
-        try {
-            Signature verifying = Signature.getInstance("SHA256withRSA");
-            verifying.initVerify(pair.pub());
-            verifying.update(input.getBytes());
-
-            return verifying.verify(Base64.decodeBase64(signature_b64));
-        } catch (NoSuchAlgorithmException e) {
-            e.printStackTrace();
-            return false;
-        }
+        return verifySignature(pair.pub(), input, signature_b64);
     }
 
 
@@ -124,8 +115,20 @@ public class MessageEncryptor {
      * @return the encrypted string (encoded in base64)
      */
     public static String encryptRSA(HelpfulRSAKeyPair pair, String input) throws InvalidKeyException {
+        return encryptRSA(pair.pub(), input);
+    }
 
-        PublicKey public_key = pair.pub();
+
+    /**
+     * Encrypts a string using the internal RSA keyset
+     *
+     * @param input the raw text input
+     * @param key the RSA key used to encrypt the message
+     * @return the encrypted string (encoded in base64)
+     */
+    public static String encryptRSA(PublicKey key, String input) throws InvalidKeyException {
+
+        PublicKey public_key = key;
         byte[] cipherText = new byte[0];
 
         try {
@@ -179,8 +182,19 @@ public class MessageEncryptor {
      * @return the raw decrypted string
      */
     public static String decryptRSA(HelpfulRSAKeyPair pair, String input_b64) throws InvalidKeyException, BadPaddingException {
+        return decryptRSA(pair.priv(), input_b64);
+    }
 
-        PrivateKey private_key = pair.priv();
+
+    /**
+     * Decrypts a string using the internal RSA keyset
+     *
+     * @param input_b64 the base64 encoded encrypted string
+     * @return the raw decrypted string
+     */
+    public static String decryptRSA(PrivateKey key, String input_b64) throws InvalidKeyException, BadPaddingException {
+
+        PrivateKey private_key = key;
         byte[] plainText = new byte[0];
 
         try {
