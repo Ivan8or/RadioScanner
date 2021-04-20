@@ -4,6 +4,7 @@ import org.apache.commons.codec.binary.Base64;
 
 import java.security.*;
 import java.security.spec.InvalidKeySpecException;
+import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
 
 
@@ -109,7 +110,7 @@ public class HelpfulRSAKeyPair {
         try {
 
             newPrivate = KeyFactory.getInstance("RSA").generatePrivate(
-                    new X509EncodedKeySpec(Base64.decodeBase64(priv_b64)));
+                    new PKCS8EncodedKeySpec(Base64.decodeBase64(priv_b64)));
 
         } catch (NoSuchAlgorithmException | InvalidKeySpecException e) {
             e.printStackTrace();

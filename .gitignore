@@ -3,5 +3,4 @@
 build/
 gradle/
 target/
-src/test/
 src/main/resources/META-INF/
