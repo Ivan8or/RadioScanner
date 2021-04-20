@@ -28,7 +28,7 @@ public class RadioSocket {
     final private ObjectInputStream ois;
 
     final private MessageData message;
-    final private MessageData response;
+    final private MessageData remote;
 
 
     /**
@@ -43,7 +43,7 @@ public class RadioSocket {
         ois = new ObjectInputStream(socket.getInputStream());
 
         message = new MessageData();
-        response = new MessageData();
+        remote = new MessageData();
     }
 
 
@@ -61,7 +61,7 @@ public class RadioSocket {
         ois = new ObjectInputStream(socket.getInputStream());
 
         message = new MessageData();
-        response = new MessageData();
+        remote = new MessageData();
     }
 
 
@@ -71,9 +71,10 @@ public class RadioSocket {
      * @param to_write the body of the message to be transmitted
      * @param reason   the reason for the message being sent
      */
-    public void setMessage(String to_write, String reason) {
+    public void setMessage(String to_write, String reason, String public_key) {
         message.body = to_write;
         message.reason = reason;
+        message.public_key = public_key;
     }
 
 
@@ -83,9 +84,9 @@ public class RadioSocket {
      * @param self_priv  our socket's private key, to be used for decrypting their message
      */
     public void encodeMessage(PublicKey remote_pub, PrivateKey self_priv) throws InvalidKeyException, SignatureException, IOException {
-        message.key = new HelpfulAESKey();
-        message.key_enc = MessageEncryptor.encryptRSA(remote_pub, message.key.key64());
-        message.body_enc = MessageEncryptor.encryptAES(message.key, message.body);
+        message.aes_key = new HelpfulAESKey();
+        message.key_enc = MessageEncryptor.encryptRSA(remote_pub, message.aes_key.key64());
+        message.body_enc = MessageEncryptor.encryptAES(message.aes_key, message.body);
         message.signature = MessageEncryptor.generateSignature(self_priv, message.body);
 
         oos.flush();
@@ -96,8 +97,8 @@ public class RadioSocket {
      * Encrypts and sends a message to the destination port
      */
     public void sendMessage() throws IOException {
-
         oos.writeUTF(message.reason);
+        oos.writeUTF(message.public_key);
         oos.writeUTF(message.key_enc);
         oos.writeUTF(message.signature);
         oos.writeUTF(message.body_enc);
@@ -109,10 +110,11 @@ public class RadioSocket {
      * receives a message from the remote port
      */
     public void receiveRemote() throws IOException {
-        response.reason = ois.readUTF();
-        response.key_enc = ois.readUTF();
-        response.signature = ois.readUTF();
-        response.body_enc = ois.readUTF();
+        remote.reason = ois.readUTF();
+        remote.public_key = ois.readUTF();
+        remote.key_enc = ois.readUTF();
+        remote.signature = ois.readUTF();
+        remote.body_enc = ois.readUTF();
     }
 
 
@@ -122,8 +124,8 @@ public class RadioSocket {
      * @param self_priv  our socket's private key, to be used for decrypting their message
      */
     public void decodeRemote(PrivateKey self_priv) throws BadPaddingException, InvalidKeyException {
-        response.key = new HelpfulAESKey(MessageEncryptor.decryptRSA(self_priv, response.key_enc));
-        response.body = MessageEncryptor.decryptAES(response.key, response.body_enc);
+        remote.aes_key = new HelpfulAESKey(MessageEncryptor.decryptRSA(self_priv, remote.key_enc));
+        remote.body = MessageEncryptor.decryptAES(remote.aes_key, remote.body_enc);
     }
 
 
@@ -135,15 +137,19 @@ public class RadioSocket {
      * @return whether the signature is valid
      */
     public Boolean verifyRemoteSignature(PublicKey remote_pub) throws SignatureException, InvalidKeyException {
-        return MessageEncryptor.verifySignature(remote_pub, response.body, response.signature);
+        return MessageEncryptor.verifySignature(remote_pub, remote.body, remote.signature);
     }
 
-    public String getRemote() {
-        return response.body;
+    public String getRemoteBody() {
+        return remote.body;
     }
 
     public String getRemoteReason() {
-        return response.reason;
+        return remote.reason;
+    }
+
+    public String getRemotePub() {
+        return remote.public_key;
     }
 
     /**
@@ -162,8 +168,10 @@ public class RadioSocket {
         private String body;
         private String body_enc;
 
-        private HelpfulAESKey key;
+        private HelpfulAESKey aes_key;
         private String key_enc;
+
+        private String public_key;
 
         private String signature;
     }

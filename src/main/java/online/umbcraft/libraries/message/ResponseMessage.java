@@ -61,20 +61,6 @@ public class ResponseMessage extends RadioMessage {
 
 
     @Override
-    public synchronized ResponseMessage setRSAKeys(String public_key, String private_key) {
-        super.setRSAKeys(public_key, private_key);
-        return this;
-    }
-
-
-    @Override
-    public synchronized ResponseMessage setRSAKeys(HelpfulRSAKeyPair keys) {
-        super.setRSAKeys(keys);
-        return this;
-    }
-
-
-    @Override
     public ResponseMessage merge(RadioMessage other) {
         super.merge(other);
         return this;

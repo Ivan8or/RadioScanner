@@ -134,7 +134,7 @@ public class WalkieTalkie {
             logger.info("adding ReasonResponder to WalkieTalkie with reason " + responder.getReason());
 
         if (!scanners.containsKey(port)) {
-            PortListener listener = new PortListener(this, port, responder.getKeyPair());
+            PortListener listener = new PortListener(this, port);
             listener.start();
             scanners.put(port, listener);
         }

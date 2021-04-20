@@ -8,11 +8,14 @@ import online.umbcraft.libraries.encrypt.HelpfulRSAKeyPair;
 import online.umbcraft.libraries.errors.RadioError;
 
 import java.io.IOException;
+import java.security.PublicKey;
 import java.util.concurrent.Future;
 
 public class ReasonMessage extends RadioMessage {
 
 
+    protected HelpfulRSAKeyPair keypair;
+    protected PublicKey remotePub;
 
     /**
      * Creates a blank RadioMessage
@@ -33,6 +36,15 @@ public class ReasonMessage extends RadioMessage {
     /**
      * sets the reason for this message being sent
      *
+     * @return the reason for this message
+     */
+    public String getReason() {
+        return message.getString("reason");
+    }
+
+    /**
+     * sets the reason for this message being sent
+     *
      * @param reason the new message reason
      * @return itself
      */
@@ -42,14 +54,38 @@ public class ReasonMessage extends RadioMessage {
         return this;
     }
 
+    /**
+     * sets the RSA keys that will be used for encryption when this message is sent
+     *
+     * @param public_key  public RSA key in base64
+     * @param private_key private RSA key in base64
+     * @return itself
+     */
+    public ReasonMessage setRSAKeys(String public_key, String private_key) {
+        return setRSAKeys(new HelpfulRSAKeyPair(public_key, private_key));
+    }
+
 
     /**
-     * sets the reason for this message being sent
+     * sets the RSA keys that will be used for encryption when this message is sent
      *
-     * @return the reason for this message
+     * @param keys RSA keypair
+     * @return itself
      */
-    public String getReason() {
-        return message.getString("reason");
+    public ReasonMessage setRSAKeys(HelpfulRSAKeyPair keys) {
+        if (debug) logger.info("putting RSA keys into message " + message);
+
+        keypair = keys;
+        return this;
+
+    }
+
+
+    public ReasonMessage setRemoteKey(PublicKey remote) {
+        if (debug) logger.info("setting remote key for message " + message);
+
+        remotePub = remote;
+        return this;
     }
 
 
@@ -67,11 +103,14 @@ public class ReasonMessage extends RadioMessage {
         if (debug)
             logger.info("sending message " + message + " to " + IP + ":" + port);
 
-        if(getReason() == null) {
+        if (getReason() == null) {
             throw new IllegalStateException("NO MESSAGE REASON SPECIFIED");
         }
-        if(RSA_PAIR == null) {
+        if (keypair == null) {
             throw new IllegalStateException("NO RSA KEYPAIR SPECIFIED");
+        }
+        if (remotePub == null) {
+            throw new IllegalStateException("NO REMOTE KEY SPECIFIED");
         }
 
         return WalkieTalkie.sharedExecutor().submit(() -> {
@@ -83,10 +122,10 @@ public class ReasonMessage extends RadioMessage {
 
             try {
                 job = new RadioSocket(IP, port);
-                job.setMessage(message.toString(), getReason());
+                job.setMessage(message.toString(), getReason(), keypair.pub64());
 
                 error = RadioError.BAD_CRYPT_KEY;
-                job.encodeMessage(RSA_PAIR.pub(), RSA_PAIR.priv());
+                job.encodeMessage(remotePub, keypair.priv());
 
                 error = RadioError.BAD_NETWORK_WRITE;
                 job.sendMessage();
@@ -95,15 +134,15 @@ public class ReasonMessage extends RadioMessage {
                 job.receiveRemote();
 
                 error = RadioError.BAD_CRYPT_KEY;
-                job.decodeRemote(RSA_PAIR.priv());
+                job.decodeRemote(keypair.priv());
 
                 error = RadioError.INVALID_SIGNATURE;
-                job.verifyRemoteSignature(RSA_PAIR.pub());
+                job.verifyRemoteSignature(remotePub);
 
                 if (debug) logger.info("message to " + IP + ":" + port + " took " + timer.time() + " ms");
 
                 error = RadioError.INVALID_JSON;
-                toReturn = new ResponseMessage(job.getRemote());
+                toReturn = new ResponseMessage(job.getRemoteBody());
 
             } catch (Exception e) {
                 if (debug) logger.severe(error.name());
@@ -112,7 +151,7 @@ public class ReasonMessage extends RadioMessage {
                         .put("TRANSMIT_ERROR", error.name());
 
                 if (error == RadioError.INVALID_JSON)
-                    toReturn.put("body", job.getRemote());
+                    toReturn.put("body", job.getRemoteBody());
             }
 
             try {
@@ -172,7 +211,7 @@ public class ReasonMessage extends RadioMessage {
 
     @Override
     public ReasonMessage put(String key, String val) {
-        if(key.equals("reason")) throw new IllegalArgumentException("reserved key");
+        if (key.equals("reason")) throw new IllegalArgumentException("reserved key");
         super.put(key, val);
         return this;
     }
@@ -181,20 +220,6 @@ public class ReasonMessage extends RadioMessage {
     @Override
     public ReasonMessage clear() {
         super.clear();
-        return this;
-    }
-
-
-    @Override
-    public synchronized ReasonMessage setRSAKeys(String public_key, String private_key) {
-        super.setRSAKeys(public_key, private_key);
-        return this;
-    }
-
-
-    @Override
-    public synchronized ReasonMessage setRSAKeys(HelpfulRSAKeyPair keys) {
-        super.setRSAKeys(keys);
         return this;
     }
 

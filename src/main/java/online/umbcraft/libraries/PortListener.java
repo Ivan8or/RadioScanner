@@ -10,6 +10,8 @@ import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.security.InvalidKeyException;
+import java.security.PrivateKey;
+import java.security.PublicKey;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
@@ -26,7 +28,6 @@ public class PortListener extends Thread {
 
     private static final Logger logger = WalkieTalkie.getLogger();
 
-    private final HelpfulRSAKeyPair RSA_PAIR;
     private final int PORT;
 
     private ServerSocket server_listener;
@@ -39,29 +40,11 @@ public class PortListener extends Thread {
      *
      * @param talkie       the {@link WalkieTalkie} instance this belongs to<p>
      * @param port         the port this listens on
-     * @param pub_key_b64  the public RSA key to encrypt {@link RadioMessage} replies
-     * @param priv_key_b64 the private RSA key to encrypt replies
      */
-    public PortListener(WalkieTalkie talkie, int port, String pub_key_b64, String priv_key_b64) {
+    public PortListener(WalkieTalkie talkie, int port) {
         this.talkie = talkie;
         responders = new HashMap<>(5);
         this.PORT = port;
-        RSA_PAIR = new HelpfulRSAKeyPair(pub_key_b64, priv_key_b64);
-    }
-
-
-    /**
-     * Creates an empty PortListener<p>
-     *
-     * @param talkie the {@link WalkieTalkie} instance this belongs to<p>
-     * @param port   the port this listens on
-     * @param pair   the RSA keypair used to encrypt {@link RadioMessage} replies
-     */
-    public PortListener(WalkieTalkie talkie, int port, HelpfulRSAKeyPair pair) {
-        this.talkie = talkie;
-        responders = new HashMap<>(5);
-        this.PORT = port;
-        RSA_PAIR = pair;
     }
 
 
@@ -129,13 +112,7 @@ public class PortListener extends Thread {
             logger.info("responding to message " + message);
 
         ReasonResponder responder = responders.get(message.get("reason"));
-        ResponseMessage response;
-        if (responder == null)
-            response = new ResponseMessage()
-                    .put("success", "false")
-                    .put("TRANSMIT_ERROR", RadioError.NO_VALID_REASON.name());
-        else
-            response = responder.response(message);
+        ResponseMessage response = responder.response(message);
 
         if (talkie.isDebugging())
             logger.info("response is " + response);
@@ -157,8 +134,8 @@ public class PortListener extends Thread {
         }
         while (true) {
 
-
             final Socket clientSocket;
+
             try {
                 clientSocket = server_listener.accept();
             } catch (IOException e) {
@@ -186,21 +163,29 @@ public class PortListener extends Thread {
                     error = RadioError.BAD_NETWORK_READ;
                     job.receiveRemote();
 
+                    error = RadioError.NO_VALID_REASON;
+                    if (!responders.containsKey(job.getRemoteReason())) throw new IllegalStateException();
+
+                    HelpfulRSAKeyPair selfPair = responders.get(job.getRemoteReason()).getKeypair();
+                    PublicKey remotePub = HelpfulRSAKeyPair.publicFrom64(job.getRemotePub());
+
                     error = RadioError.BAD_CRYPT_KEY;
-                    job.decodeRemote(RSA_PAIR.priv());
-                    String messageBody = job.getRemote();
+                    job.decodeRemote(selfPair.priv());
 
                     error = RadioError.INVALID_SIGNATURE;
-                    if (!job.verifyRemoteSignature(RSA_PAIR.pub())) throw new InvalidKeyException();
-
-                    error = RadioError.ERROR_ON_RESPONSE;
-                    ResponseMessage response = respond(new ReasonMessage(messageBody));
+                    if (!job.verifyRemoteSignature(remotePub)) throw new InvalidKeyException();
 
                     error = RadioError.INVALID_JSON;
-                    job.setMessage(response.json(), "");
+                    ReasonMessage message = new ReasonMessage(job.getRemoteBody());
+
+                    error = RadioError.ERROR_ON_RESPONSE;
+                    ResponseMessage response = respond(message);
+
+                    error = RadioError.INVALID_JSON;
+                    job.setMessage(response.json(), "", selfPair.pub64());
 
                     error = RadioError.BAD_CRYPT_KEY;
-                    job.encodeMessage(RSA_PAIR.pub(), RSA_PAIR.priv());
+                    job.encodeMessage(remotePub, selfPair.priv());
 
                     error = RadioError.BAD_NETWORK_WRITE;
                     job.sendMessage();

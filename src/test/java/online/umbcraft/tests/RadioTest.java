@@ -15,37 +15,39 @@ public class RadioTest {
     @Test
     public void testServerMessage() {
 
-        HelpfulRSAKeyPair keys = new HelpfulRSAKeyPair();
+        HelpfulRSAKeyPair server_keys = new HelpfulRSAKeyPair();
+        HelpfulRSAKeyPair client_keys = new HelpfulRSAKeyPair();
+
         WalkieTalkie walkie = new WalkieTalkie();
 
-        walkie.addResponse(24000, new ReasonResponder("testsuite", keys) {
+        walkie.addResponse(24000, new ReasonResponder("testsuite", server_keys) {
 
             @Override
             public ResponseMessage response(ReasonMessage message) {
                 int value = Integer.parseInt(message.get("value"));
                 return new ResponseMessage()
-                        .put("returnval",value*2+"")
+                        .put("returnval", value * 2 + "")
                         .setSuccess(true);
             }
         });
 
         String answer = null;
         boolean success = false;
-        for(int i = 0; i < 5; i++) {
-            try {
-                ResponseMessage sending = new ReasonMessage()
-                        .setReason("testsuite")
-                        .put("value", ""+i)
-                        .setRSAKeys(keys)
-                        .send("127.0.0.1:24000")
-                        .get();
-                answer = sending.get("returnval");
-                success = sending.getSuccess();
-            } catch (InterruptedException | ExecutionException e) {
-                e.printStackTrace();
-            }
-            Assert.assertTrue(success);
-            Assert.assertEquals(answer, ""+i*2);
+        try {
+            ResponseMessage sending = new ReasonMessage()
+                    .setReason("testsuite")
+                    .put("value", "2")
+                    .setRSAKeys(client_keys)
+                    .setRemoteKey(server_keys.pub())
+                    .send("127.0.0.1:24000")
+                    .get();
+            answer = sending.get("returnval");
+            success = sending.getSuccess();
+        } catch (InterruptedException | ExecutionException e) {
+            e.printStackTrace();
         }
+        Assert.assertTrue(success);
+        Assert.assertEquals(answer, "4");
+
     }
 }

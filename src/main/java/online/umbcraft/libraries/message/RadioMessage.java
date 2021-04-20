@@ -26,7 +26,6 @@ public class RadioMessage {
 
     final static protected Logger logger = WalkieTalkie.getLogger();
     protected JSONObject message;
-    protected HelpfulRSAKeyPair RSA_PAIR;
     protected boolean debug;
 
 
@@ -77,32 +76,6 @@ public class RadioMessage {
         return this;
     }
 
-
-    /**
-     * sets the RSA keys that will be used for encryption when this message is sent
-     *
-     * @param public_key  public RSA key in base64
-     * @param private_key private RSA key in base64
-     * @return itself
-     */
-    public synchronized RadioMessage setRSAKeys(String public_key, String private_key) {
-        return setRSAKeys(new HelpfulRSAKeyPair(public_key, private_key));
-    }
-
-
-    /**
-     * sets the RSA keys that will be used for encryption when this message is sent
-     *
-     * @param keys RSA keypair
-     * @return itself
-     */
-    public synchronized RadioMessage setRSAKeys(HelpfulRSAKeyPair keys) {
-        if (debug) logger.info("putting RSA keys into message " + message);
-
-        RSA_PAIR = keys;
-        return this;
-
-    }
 
 
     /**
