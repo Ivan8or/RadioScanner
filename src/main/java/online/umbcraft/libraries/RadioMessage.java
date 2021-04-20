@@ -209,7 +209,6 @@ public class RadioMessage {
      * @param port the destination port
      * @return A {@link Future}bcontaining the reply sent by the {@link ReasonResponder} which received the message
      */
-    @Deprecated
     public Future<RadioMessage> send(String IP, int port) {
 
         ProcessTimer timer = new ProcessTimer();
@@ -315,7 +314,6 @@ public class RadioMessage {
      * @param port the destination port
      * @return A {@link Future} containing the reply sent by the {@link ReasonResponder} which received the message
      */
-    @Deprecated
     public Future<RadioMessage> send(String IP, String port) {
         int port_num = 0;
         try {
@@ -334,7 +332,6 @@ public class RadioMessage {
      * @param address the destination IPv4 address, made up of IP:port
      * @return A {@link Future} containing the reply sent by the {@link ReasonResponder} which received the message
      */
-    @Deprecated
     public Future<RadioMessage> send(String address) {
 
         String[] split = address.split(":");
