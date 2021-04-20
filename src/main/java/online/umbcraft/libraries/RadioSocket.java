@@ -2,6 +2,7 @@ package online.umbcraft.libraries;
 
 import online.umbcraft.libraries.encrypt.HelpfulAESKey;
 import online.umbcraft.libraries.encrypt.MessageEncryptor;
+import online.umbcraft.libraries.message.RadioMessage;
 
 import javax.crypto.BadPaddingException;
 import java.io.IOException;
@@ -29,6 +30,9 @@ public class RadioSocket {
     final private PublicKey remote_pub;
     final private PrivateKey self_priv;
 
+    final private MessageData message;
+    final private MessageData response;
+
 
     /**
      * Creates a RadioSocket from a Socket, and assigns it a remove public key and own private key to use while encrypting
@@ -44,6 +48,9 @@ public class RadioSocket {
         ois = new ObjectInputStream(socket.getInputStream());
         this.remote_pub = remote_pub;
         this.self_priv = self_priv;
+
+        message = new MessageData();
+        response = new MessageData();
     }
 
 
@@ -63,6 +70,9 @@ public class RadioSocket {
         ois = new ObjectInputStream(socket.getInputStream());
         this.remote_pub = remote_pub;
         this.self_priv = self_priv;
+
+        message = new MessageData();
+        response = new MessageData();
     }
 
 
@@ -70,41 +80,72 @@ public class RadioSocket {
      * Encrypts and sends a message to the destination port
      *
      * @param to_write the body of the message to be transmitted
+     * @param reason   the reason for the message being sent
      */
-    public void sendMessage(String to_write) throws InvalidKeyException, SignatureException, IOException {
-        HelpfulAESKey AESkey = new HelpfulAESKey();
+    public void setMessage(String to_write, String reason) {
+        message.body = to_write;
+        message.reason = reason;
+    }
 
-        oos.writeUTF(MessageEncryptor.encryptRSA(remote_pub, AESkey.key64()));
-        oos.writeUTF(MessageEncryptor.encryptAES(AESkey, to_write));
-        oos.writeUTF(MessageEncryptor.generateSignature(self_priv, to_write));
+
+    /**
+     * Encrypts and sends a message to the destination port
+     */
+    public void encodeMessage() throws InvalidKeyException, SignatureException, IOException {
+        message.key = new HelpfulAESKey();
+        message.key_enc = MessageEncryptor.encryptRSA(remote_pub, message.key.key64());
+        message.body_enc = MessageEncryptor.encryptAES(message.key, message.body);
+        message.signature = MessageEncryptor.generateSignature(self_priv, message.body);
 
         oos.flush();
     }
 
 
     /**
-     * receives and decrypts a message from the remote port
-     *
-     * @return the body of the received message
+     * Encrypts and sends a message to the destination port
      */
-    public String receiveMessage() throws IOException, BadPaddingException, InvalidKeyException {
+    public void sendMessage() throws IOException {
 
-        HelpfulAESKey aeskey = new HelpfulAESKey(MessageEncryptor.decryptRSA(self_priv, ois.readUTF()));
-        return MessageEncryptor.decryptAES(aeskey, ois.readUTF());
-
+        oos.writeUTF(message.reason);
+        oos.writeUTF(message.key_enc);
+        oos.writeUTF(message.signature);
+        oos.writeUTF(message.body_enc);
+        oos.flush();
     }
 
 
     /**
-     * reeives and verifies an RSA signature of a body of text
-     *
-     * @param body the raw body to be verified against the signature
-     * @return whether the signature is valid
+     * receives a message from the remote port
      */
-    public Boolean verifySignature(String body) throws IOException, SignatureException, InvalidKeyException {
-        return MessageEncryptor.verifySignature(remote_pub, body, ois.readUTF());
+    public void receiveResponse() throws IOException {
+        response.reason = ois.readUTF();
+        response.key_enc = ois.readUTF();
+        response.signature = ois.readUTF();
+        response.body_enc = ois.readUTF();
     }
 
+
+    /**
+     * decodes the received message body
+     */
+    public void decodeResponse() throws BadPaddingException, InvalidKeyException {
+        response.key = new HelpfulAESKey(MessageEncryptor.decryptRSA(self_priv, response.key_enc));
+        response.body = MessageEncryptor.decryptAES(response.key, response.body_enc);
+    }
+
+
+    /**
+     * verifies an RSA signature of the received body of text
+     *
+     * @return whether the signature is valid
+     */
+    public Boolean verifySignature() throws SignatureException, InvalidKeyException {
+        return MessageEncryptor.verifySignature(remote_pub, response.body, response.signature);
+    }
+
+    public String getResponse() {
+        return response.body;
+    }
 
     /**
      * closes all streams / sockets used by this object
@@ -113,6 +154,19 @@ public class RadioSocket {
         oos.close();
         ois.close();
         socket.close();
+    }
+
+
+    private class MessageData {
+        private String reason;
+
+        private String body;
+        private String body_enc;
+
+        private HelpfulAESKey key;
+        private String key_enc;
+
+        private String signature;
     }
 
 }

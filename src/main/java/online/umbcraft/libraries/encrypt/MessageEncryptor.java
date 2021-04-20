@@ -2,6 +2,8 @@ package online.umbcraft.libraries.encrypt;
 
 import org.apache.commons.codec.binary.Base64;
 
+import java.io.UnsupportedEncodingException;
+import java.math.BigInteger;
 import java.security.*;
 import javax.crypto.*;
 
@@ -12,7 +14,7 @@ public class MessageEncryptor {
 
 
     /**
-     * Signs a string using the stored RSA private key
+     * Signs (the hash of) a string using the stored RSA private key
      *
      * @param pair  the RSA keypair from which the private key is used to make the signature
      * @param input the raw string input
@@ -24,7 +26,7 @@ public class MessageEncryptor {
 
 
     /**
-     * Signs a string using the stored RSA private key
+     * Signs (the hash of) a string using the stored RSA private key
      *
      * @param key   the private RSA key used to make the signature
      * @param input the raw string input
@@ -46,7 +48,7 @@ public class MessageEncryptor {
 
 
     /**
-     * Verifies an RSA signature for a string using its RSA keyset
+     * Verifies an RSA signature for (the hash of) a string using its RSA keyset
      *
      * @param pair          the RSA keypair from which the public key is used to verify the signature
      * @param input         the raw string which was signed
@@ -59,7 +61,7 @@ public class MessageEncryptor {
 
 
     /**
-     * Verifies an RSA signature for a string using its RSA keyset
+     * Verifies an RSA signature for (the hash of) a string using its RSA keyset
      *
      * @param key           the public key used to verify the signature
      * @param input         the raw string which was signed

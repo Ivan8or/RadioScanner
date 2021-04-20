@@ -1,6 +1,9 @@
 package online.umbcraft.libraries;
 
 import online.umbcraft.libraries.encrypt.HelpfulRSAKeyPair;
+import online.umbcraft.libraries.message.RadioMessage;
+import online.umbcraft.libraries.message.ReasonMessage;
+import online.umbcraft.libraries.message.ResponseMessage;
 
 /**
  * Responsible for responding to a single type/reason of {@link RadioMessage}<p>
@@ -54,5 +57,5 @@ public abstract class ReasonResponder {
      * @param message the incoming message
      * @return the generated reply
      */
-    public abstract RadioMessage response(RadioMessage message);
+    public abstract ResponseMessage response(ReasonMessage message);
 }

@@ -1,12 +1,11 @@
-package online.umbcraft.libraries;
+package online.umbcraft.libraries.message;
 
 import kong.unirest.json.JSONException;
 import kong.unirest.json.JSONObject;
+import online.umbcraft.libraries.ReasonResponder;
+import online.umbcraft.libraries.WalkieTalkie;
 import online.umbcraft.libraries.encrypt.HelpfulRSAKeyPair;
-import online.umbcraft.libraries.errors.RadioError;
 
-import java.io.IOException;
-import java.util.concurrent.Future;
 import java.util.logging.Logger;
 
 
@@ -25,10 +24,10 @@ import java.util.logging.Logger;
  */
 public class RadioMessage {
 
-    private static final Logger logger = WalkieTalkie.getLogger();
-    private JSONObject message;
-    private HelpfulRSAKeyPair RSA_PAIR;
-    private boolean debug;
+    final static protected Logger logger = WalkieTalkie.getLogger();
+    protected JSONObject message;
+    protected HelpfulRSAKeyPair RSA_PAIR;
+    protected boolean debug;
 
 
     /**
@@ -72,8 +71,8 @@ public class RadioMessage {
      * @return itself
      */
     public RadioMessage put(String key, String val) {
-        if (debug) logger.info("inserting " + key + " = " + val + " into message " + message);
 
+        if (debug) logger.info("inserting " + key + " = " + val + " into message " + message);
         message.put(key, val);
         return this;
     }
@@ -88,17 +87,6 @@ public class RadioMessage {
      */
     public synchronized RadioMessage setRSAKeys(String public_key, String private_key) {
         return setRSAKeys(new HelpfulRSAKeyPair(public_key, private_key));
-    }
-
-
-    /**
-     * sets the RSA keys that will be used for encryption when this message is sent
-     *
-     * @param keys base64 RSA keypair array (public key in index 0, private key in index 1)
-     * @return itself
-     */
-    public synchronized RadioMessage setRSAKeys(String[] keys) {
-        return setRSAKeys(new HelpfulRSAKeyPair(keys[0], keys[1]));
     }
 
 
@@ -190,110 +178,17 @@ public class RadioMessage {
      *
      * @return the exact JSON form of this message
      */
-    public String toString() {
+    public String json() {
         return message.toString();
     }
 
 
     /**
-     * encrypts and sends itself to a specified IP and port
+     * Gives the content of this message in the form of a JSON string
      *
-     * @param IP   the destination IPv4 address
-     * @param port the destination port
-     * @return A {@link Future}bcontaining the reply sent by the {@link ReasonResponder} which received the message
+     * @return the exact JSON form of this message
      */
-    public Future<RadioMessage> send(String IP, int port) {
-
-        ProcessTimer timer = new ProcessTimer();
-
-        if (debug)
-            logger.info("sending message " + message + " to " + IP + ":" + port);
-
-
-        return WalkieTalkie.sharedExecutor().submit(() -> {
-
-            RadioMessage toReturn;
-            RadioSocket job = null;
-            String responseBody = "";
-
-            RadioError error = RadioError.FAILED_TO_CONNECT;
-
-            try {
-                job = new RadioSocket(IP, port, RSA_PAIR.pub(), RSA_PAIR.priv());
-
-                error = RadioError.BAD_NETWORK_WRITE;
-                job.sendMessage(message.toString());
-
-                error = RadioError.BAD_NETWORK_READ;
-                responseBody = job.receiveMessage();
-
-                error = RadioError.INVALID_SIGNATURE;
-                job.verifySignature(responseBody);
-
-                if (debug) logger.info("message to " + IP + ":" + port + " took " + timer.time() + " ms");
-
-                error = RadioError.INVALID_JSON;
-                toReturn = new RadioMessage(responseBody);
-
-            } catch (Exception e) {
-                if (debug) logger.severe(error.name());
-
-                toReturn = new RadioMessage()
-                    .put("TRANSMIT_ERROR", error.name());
-
-                if(error == RadioError.INVALID_JSON)
-                    toReturn.put("body", responseBody);
-            }
-
-            try {
-                if(job != null) job.close();
-            }catch(IOException e) { e.printStackTrace(); }
-
-            return toReturn;
-        });
-    }
-
-
-    /**
-     * encrypts and sends itself to a specified IP and port
-     *
-     * @param IP   the destination IPv4 address
-     * @param port the destination port
-     * @return A {@link Future} containing the reply sent by the {@link ReasonResponder} which received the message
-     */
-    public Future<RadioMessage> send(String IP, String port) {
-        int port_num = 0;
-        try {
-            port_num = Integer.parseInt(port);
-        } catch (NumberFormatException e) {
-            throw new IllegalArgumentException("Invalid address format");
-        }
-        return send(IP, port_num);
-
-    }
-
-
-    /**
-     * encrypts and sends itself to a specified IP and port
-     *
-     * @param address the destination IPv4 address, made up of IP:port
-     * @return A {@link Future} containing the reply sent by the {@link ReasonResponder} which received the message
-     */
-    public Future<RadioMessage> send(String address) {
-
-        String[] split = address.split(":");
-
-        if (split.length != 2)
-            throw new IllegalArgumentException("Invalid address format");
-
-        String ip = split[0];
-        int port = 0;
-        try {
-            port = Integer.parseInt(split[1]);
-        } catch (NumberFormatException e) {
-            throw new IllegalArgumentException("Invalid address format");
-        }
-
-        return send(ip, port);
+    public String toString() {
+        return message.toString();
     }
 }

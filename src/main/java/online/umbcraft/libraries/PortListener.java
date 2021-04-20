@@ -2,6 +2,9 @@ package online.umbcraft.libraries;
 
 import online.umbcraft.libraries.encrypt.HelpfulRSAKeyPair;
 import online.umbcraft.libraries.errors.RadioError;
+import online.umbcraft.libraries.message.RadioMessage;
+import online.umbcraft.libraries.message.ReasonMessage;
+import online.umbcraft.libraries.message.ResponseMessage;
 
 import java.io.*;
 import java.net.ServerSocket;
@@ -120,15 +123,15 @@ public class PortListener extends Thread {
      * @param message the incoming {@link RadioMessage}
      * @return the {@link ReasonResponder} produced response
      */
-    private RadioMessage respond(RadioMessage message) {
+    private ResponseMessage respond(ReasonMessage message) {
 
         if (talkie.isDebugging())
             logger.info("responding to message " + message);
 
         ReasonResponder responder = responders.get(message.get("reason"));
-        RadioMessage response;
+        ResponseMessage response;
         if (responder == null)
-            response = new RadioMessage()
+            response = new ResponseMessage()
                     .put("success", "false")
                     .put("TRANSMIT_ERROR", RadioError.NO_VALID_REASON.name());
         else
@@ -181,22 +184,33 @@ public class PortListener extends Thread {
                     job = new RadioSocket(clientSocket, RSA_PAIR.pub(), RSA_PAIR.priv());
 
                     error = RadioError.BAD_NETWORK_READ;
-                    String messageBody = job.receiveMessage();
+                    job.receiveResponse();
+
+                    error = RadioError.BAD_CRYPT_KEY;
+                    job.decodeResponse();
+                    String messageBody = job.getResponse();
 
                     error = RadioError.INVALID_SIGNATURE;
-                    boolean validSignature = job.verifySignature(messageBody);
-                    if (!validSignature) throw new InvalidKeyException();
+                    if (!job.verifySignature()) throw new InvalidKeyException();
 
                     error = RadioError.ERROR_ON_RESPONSE;
-                    RadioMessage response = respond(new RadioMessage(messageBody));
+                    ResponseMessage response = respond(new ReasonMessage(messageBody));
+
+                    error = RadioError.INVALID_JSON;
+                    System.out.println(response.json());
+                    job.setMessage(response.json(), "");
+
+                    error = RadioError.BAD_CRYPT_KEY;
+                    job.encodeMessage();
 
                     error = RadioError.BAD_NETWORK_WRITE;
-                    job.sendMessage(response.toString());
+                    job.sendMessage();
 
-                    error = RadioError.NO_VALID_REASON;
+                    error = RadioError.FAILED_TO_CONNECT;
                     job.close();
 
                 } catch (Exception e) {
+                    e.printStackTrace();
                     logger.severe(error.name() + " - " + e.getClass().getSimpleName());
                 }
             });

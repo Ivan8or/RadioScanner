@@ -1,7 +1,7 @@
 package online.umbcraft.libraries.errors;
 
 
-import online.umbcraft.libraries.RadioMessage;
+import online.umbcraft.libraries.message.RadioMessage;
 import online.umbcraft.libraries.ReasonResponder;
 
 /**
@@ -44,9 +44,9 @@ public enum RadioError {
 
 
     /**
-     * {@link RadioMessage} was not able to decrypt the reply with its RSA key
+     * {@link RadioMessage} was not able to decrypt the reply with its RSA / AES key
      */
-    BAD_RSA_KEY,
+    BAD_CRYPT_KEY,
 
 
     /**
