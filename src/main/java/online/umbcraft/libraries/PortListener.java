@@ -176,9 +176,8 @@ public class PortListener extends Thread {
             WalkieTalkie.sharedExecutor().submit(() -> {
 
                 final RadioSocket job;
-                RadioError error = null;
+                RadioError error = RadioError.FAILED_TO_CONNECT;
                 try {
-                    error = RadioError.FAILED_TO_CONNECT;
                     job = new RadioSocket(clientSocket, RSA_PAIR.pub(), RSA_PAIR.priv());
 
                     error = RadioError.BAD_NETWORK_READ;
@@ -194,16 +193,13 @@ public class PortListener extends Thread {
                     error = RadioError.BAD_NETWORK_WRITE;
                     job.sendMessage(response.toString());
 
-                    error = RadioError.FAILED_TO_CONNECT;
+                    error = RadioError.NO_VALID_REASON;
                     job.close();
 
                 } catch (Exception e) {
-                    e.printStackTrace();
-                    logger.severe(error.name());
+                    logger.severe(error.name() + " - " + e.getClass().getSimpleName());
                 }
             });
-
-
         }
     }
 }
