@@ -33,9 +33,9 @@ public class RadioSocket {
     /**
      * Creates a RadioSocket from a Socket, and assigns it a remove public key and own private key to use while encrypting
      *
-     * @param socket Socket object to be used for the transaction
+     * @param socket     Socket object to be used for the transaction
      * @param remote_pub remote socket's public key, to be used for encrypting our message
-     * @param self_priv our socket's private key, to be used for decrypting their message
+     * @param self_priv  our socket's private key, to be used for decrypting their message
      */
     public RadioSocket(Socket socket, PublicKey remote_pub, PrivateKey self_priv) throws IOException {
         this.socket = socket;
@@ -51,10 +51,10 @@ public class RadioSocket {
      * Creates a RadioSocket using an IP and port number
      * assigns it a remove public key and own private key to use while encrypting
      *
-     * @param ip the IP to connect to
-     * @param port the port to connect to
+     * @param ip         the IP to connect to
+     * @param port       the port to connect to
      * @param remote_pub remote socket's public key, to be used for encrypting our message
-     * @param self_priv our socket's private key, to be used for decrypting their message
+     * @param self_priv  our socket's private key, to be used for decrypting their message
      */
     public RadioSocket(final String ip, final int port, PublicKey remote_pub, PrivateKey self_priv) throws IOException {
         this.socket = new Socket(ip, port);
@@ -74,9 +74,9 @@ public class RadioSocket {
     public void sendMessage(String to_write) throws InvalidKeyException, SignatureException, IOException {
         HelpfulAESKey AESkey = new HelpfulAESKey();
 
-        oos.writeUTF( MessageEncryptor.encryptRSA(remote_pub, AESkey.key64()) );
-        oos.writeUTF( MessageEncryptor.encryptAES(AESkey, to_write) );
-        oos.writeUTF( MessageEncryptor.generateSignature(self_priv, to_write) );
+        oos.writeUTF(MessageEncryptor.encryptRSA(remote_pub, AESkey.key64()));
+        oos.writeUTF(MessageEncryptor.encryptAES(AESkey, to_write));
+        oos.writeUTF(MessageEncryptor.generateSignature(self_priv, to_write));
 
         oos.flush();
     }
@@ -99,7 +99,6 @@ public class RadioSocket {
      * reeives and verifies an RSA signature of a body of text
      *
      * @param body the raw body to be verified against the signature
-     *
      * @return whether the signature is valid
      */
     public Boolean verifySignature(String body) throws IOException, SignatureException, InvalidKeyException {

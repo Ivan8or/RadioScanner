@@ -111,7 +111,7 @@ public class MessageEncryptor {
      * Encrypts a string using the internal RSA keyset
      *
      * @param input the raw text input
-     * @param pair the RSA keypair from which the public key will be used to encrypt
+     * @param pair  the RSA keypair from which the public key will be used to encrypt
      * @return the encrypted string (encoded in base64)
      */
     public static String encryptRSA(HelpfulRSAKeyPair pair, String input) throws InvalidKeyException {
@@ -123,7 +123,7 @@ public class MessageEncryptor {
      * Encrypts a string using the internal RSA keyset
      *
      * @param input the raw text input
-     * @param key the RSA key used to encrypt the message
+     * @param key   the RSA key used to encrypt the message
      * @return the encrypted string (encoded in base64)
      */
     public static String encryptRSA(PublicKey key, String input) throws InvalidKeyException {
@@ -178,7 +178,7 @@ public class MessageEncryptor {
     /**
      * Decrypts a string using the internal RSA keyset
      *
-     * @param pair the keypair containing the private key to be used to decrypt
+     * @param pair      the keypair containing the private key to be used to decrypt
      * @param input_b64 the base64 encoded encrypted string
      * @return the raw decrypted string
      */
@@ -190,7 +190,7 @@ public class MessageEncryptor {
     /**
      * Decrypts a string using the internal RSA keyset
      *
-     * @param key the private RSA key to be used to decrypt
+     * @param key       the private RSA key to be used to decrypt
      * @param input_b64 the base64 encoded encrypted string
      * @return the raw decrypted string
      */
@@ -201,9 +201,7 @@ public class MessageEncryptor {
 
         try {
             Cipher cipher = Cipher.getInstance("RSA/ECB/PKCS1Padding");
-
             cipher.init(Cipher.DECRYPT_MODE, private_key);
-
 
             plainText = cipher.doFinal(Base64.decodeBase64(input_b64));
 
