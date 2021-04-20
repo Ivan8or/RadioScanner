@@ -120,6 +120,7 @@ public class MessageEncryptor {
      * Encrypts a string using the internal RSA keyset
      *
      * @param input the raw text input
+     * @param pair the RSA keypair from which the public key will be used to encrypt
      * @return the encrypted string (encoded in base64)
      */
     public static String encryptRSA(HelpfulRSAKeyPair pair, String input) throws InvalidKeyException {
@@ -147,7 +148,7 @@ public class MessageEncryptor {
     /**
      * Decrypts a string using an AES key
      *
-     * @param AESkey    the AES key
+     * @param AESkey    the AES key to be used to decrypt
      * @param input_b64 the base64 encoded encrypted string
      * @return the raw decrypted string
      */
