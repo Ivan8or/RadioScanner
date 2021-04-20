@@ -18,7 +18,7 @@ public class HelpfulRSAKeyPair {
 
 
     /**
-     * Creates a {@link HelpfulRSAKeyPair} containing a randomly generated keypair
+     * Creates a {@link HelpfulRSAKeyPair} containing a randomly generated RSA keypair
      */
     public HelpfulRSAKeyPair() {
 
@@ -32,7 +32,6 @@ public class HelpfulRSAKeyPair {
 
         generator.initialize(2048);
         KeyPair secKey = generator.generateKeyPair();
-
         PUBLIC_KEY = secKey.getPublic();
         PRIVATE_KEY = secKey.getPrivate();
     }
@@ -41,51 +40,81 @@ public class HelpfulRSAKeyPair {
     /**
      * Creates a {@link HelpfulRSAKeyPair} containing the specified keypair
      *
-     * @param keypair       an RSA keypair array encoded in base64 (index 0 is public, index 1 is private)
+     * @param keypair an RSA keypair array encoded in base64
+     *                (index 0 is public, index 1 is private)
      */
     public HelpfulRSAKeyPair(String[] keypair) {
 
-        PublicKey newPublic = null;
-        PrivateKey newPrivate = null;
-
-        try {
-            newPublic = KeyFactory.getInstance("RSA").generatePublic(
-                    new X509EncodedKeySpec(Base64.decodeBase64(keypair[0])));
-            newPrivate = KeyFactory.getInstance("RSA").generatePrivate(
-                    new X509EncodedKeySpec(Base64.decodeBase64(keypair[1])));
-
-        } catch (NoSuchAlgorithmException | InvalidKeySpecException e) {
-            e.printStackTrace();
-        }
-
-        PUBLIC_KEY = newPublic;
-        PRIVATE_KEY = newPrivate;
+        PUBLIC_KEY = publicFrom64(keypair[0]);
+        PRIVATE_KEY = privateFrom64(keypair[1]);
     }
 
 
     /**
      * Creates a {@link HelpfulRSAKeyPair} containing the specified keyset
      *
-     * @param pub_key_b64       the public RSA key encoded in base64
-     * @param priv_key_b64      the private RSA key encoded in base64
+     * @param pub_key_b64  the public RSA key encoded in base64
+     * @param priv_key_b64 the private RSA key encoded in base64
      */
     public HelpfulRSAKeyPair(String pub_key_b64, String priv_key_b64) {
 
+        PUBLIC_KEY = publicFrom64(pub_key_b64);
+        PRIVATE_KEY = privateFrom64(priv_key_b64);
+    }
+
+
+    /**
+     * Creates a {@link HelpfulRSAKeyPair} containing the specified keyset
+     *
+     * @param pub_key  the public RSA key
+     * @param priv_key the private RSA key
+     */
+    public HelpfulRSAKeyPair(PublicKey pub_key, PrivateKey priv_key) {
+
+        PUBLIC_KEY = pub_key;
+        PRIVATE_KEY = priv_key;
+    }
+
+
+    /**
+     * Creates an RSA {@link PublicKey} from a base64 public key string
+     *
+     * @param pub_b64 the public RSA key encoded in base64
+     * @return the created PublicKey object
+     */
+    public static PublicKey publicFrom64(String pub_b64) {
+
         PublicKey newPublic = null;
-        PrivateKey newPrivate = null;
 
         try {
             newPublic = KeyFactory.getInstance("RSA").generatePublic(
-                    new X509EncodedKeySpec(Base64.decodeBase64(pub_key_b64)));
+                    new X509EncodedKeySpec(Base64.decodeBase64(pub_b64)));
+        } catch (NoSuchAlgorithmException | InvalidKeySpecException e) {
+            e.printStackTrace();
+        }
+        return newPublic;
+    }
+
+
+    /**
+     * Creates an RSA {@link PrivateKey} from a base64 public key string
+     *
+     * @param priv_b64 the private RSA key encoded in base64
+     * @return the created PrivateKey object
+     */
+    public static PrivateKey privateFrom64(String priv_b64) {
+
+        PrivateKey newPrivate = null;
+
+        try {
+
             newPrivate = KeyFactory.getInstance("RSA").generatePrivate(
-                    new X509EncodedKeySpec(Base64.decodeBase64(priv_key_b64)));
+                    new X509EncodedKeySpec(Base64.decodeBase64(priv_b64)));
 
         } catch (NoSuchAlgorithmException | InvalidKeySpecException e) {
             e.printStackTrace();
         }
-
-        PUBLIC_KEY = newPublic;
-        PRIVATE_KEY = newPrivate;
+        return newPrivate;
     }
 
 

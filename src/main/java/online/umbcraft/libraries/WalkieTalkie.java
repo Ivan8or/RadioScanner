@@ -48,7 +48,7 @@ public class WalkieTalkie {
     /**
      * Creates a blank WalkieTalkie containing RSA keypair for use in responding to messages
      *
-     * @param keyset_b64  base 64 RSA keypair
+     * @param keyset_b64 base 64 RSA keypair
      * @see WalkieTalkie
      */
     public WalkieTalkie(String[] keyset_b64) {
@@ -64,7 +64,7 @@ public class WalkieTalkie {
     /**
      * Creates a blank WalkieTalkie containing RSA keypair for use in responding to messages
      *
-     * @param pair  RSA keypair
+     * @param pair RSA keypair
      * @see WalkieTalkie
      */
     public WalkieTalkie(HelpfulRSAKeyPair pair) {

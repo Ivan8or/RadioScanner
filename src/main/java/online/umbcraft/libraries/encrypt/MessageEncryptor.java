@@ -3,7 +3,6 @@ package online.umbcraft.libraries.encrypt;
 import org.apache.commons.codec.binary.Base64;
 
 import java.security.*;
-
 import javax.crypto.*;
 
 /**
@@ -15,13 +14,26 @@ public class MessageEncryptor {
     /**
      * Signs a string using the stored RSA private key
      *
+     * @param pair  the RSA keypair from which the private key is used to make the signature
      * @param input the raw string input
-     * @return the          signature encoded in base64
+     * @return the signature encoded in base64
      */
     public static String generateSignature(HelpfulRSAKeyPair pair, String input) throws InvalidKeyException, SignatureException {
+        return generateSignature(pair.priv(), input);
+    }
+
+
+    /**
+     * Signs a string using the stored RSA private key
+     *
+     * @param key   the private RSA key used to make the signature
+     * @param input the raw string input
+     * @return the signature encoded in base64
+     */
+    public static String generateSignature(PrivateKey key, String input) throws InvalidKeyException, SignatureException {
         try {
             Signature sign = Signature.getInstance("SHA256withRSA");
-            sign.initSign(pair.priv());
+            sign.initSign(key);
             sign.update(input.getBytes());
             byte[] sig_bytes = sign.sign();
 
@@ -36,6 +48,7 @@ public class MessageEncryptor {
     /**
      * Verifies an RSA signature for a string using its RSA keyset
      *
+     * @param pair          the RSA keypair from which the public key is used to verify the signature
      * @param input         the raw string which was signed
      * @param signature_b64 the signature in question (encoded in base64)
      * @return whether or not the signature is valid
@@ -44,6 +57,28 @@ public class MessageEncryptor {
         try {
             Signature verifying = Signature.getInstance("SHA256withRSA");
             verifying.initVerify(pair.pub());
+            verifying.update(input.getBytes());
+
+            return verifying.verify(Base64.decodeBase64(signature_b64));
+        } catch (NoSuchAlgorithmException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+
+    /**
+     * Verifies an RSA signature for a string using its RSA keyset
+     *
+     * @param key           the public key used to verify the signature
+     * @param input         the raw string which was signed
+     * @param signature_b64 the signature in question (encoded in base64)
+     * @return whether or not the signature is valid
+     */
+    public static boolean verifySignature(PublicKey key, String input, String signature_b64) throws InvalidKeyException, SignatureException {
+        try {
+            Signature verifying = Signature.getInstance("SHA256withRSA");
+            verifying.initVerify(key);
             verifying.update(input.getBytes());
 
             return verifying.verify(Base64.decodeBase64(signature_b64));
@@ -155,12 +190,11 @@ public class MessageEncryptor {
 
             plainText = cipher.doFinal(Base64.decodeBase64(input_b64));
 
-        } catch(NoSuchAlgorithmException | NoSuchPaddingException
+        } catch (NoSuchAlgorithmException | NoSuchPaddingException
                 | IllegalBlockSizeException e) {
 
             e.printStackTrace();
         }
-
 
         return new String(plainText);
     }
