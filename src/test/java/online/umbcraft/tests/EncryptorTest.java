@@ -115,24 +115,6 @@ public class EncryptorTest {
     }
 
     @Test
-    public void signatureLength() {
-        HelpfulRSAKeyPair pair = new HelpfulRSAKeyPair(public_key, private_key);
-
-        String to_sign = "0000000000";
-        for(int i = 0; i < 12; i++) {
-            to_sign = to_sign + to_sign;
-        }
-
-        String signature = null;
-        try {
-            signature = MessageEncryptor.generateSignature(pair, to_sign);
-        } catch (InvalidKeyException | SignatureException e) {
-            e.printStackTrace();
-        }
-        System.out.println(signature.length());
-    }
-
-    @Test
     public void signatureGenerate() {
         HelpfulRSAKeyPair pair = new HelpfulRSAKeyPair(public_key, private_key);
 

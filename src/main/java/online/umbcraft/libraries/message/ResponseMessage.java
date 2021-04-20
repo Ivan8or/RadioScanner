@@ -41,7 +41,9 @@ public class ResponseMessage extends RadioMessage {
      * @return whether this response was successful
      */
     public Boolean getSuccess() {
-        return message.getBoolean("success");
+        if(message.has("success"))
+            return message.getBoolean("success");
+        return false;
     }
 
 

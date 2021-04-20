@@ -42,7 +42,7 @@ public abstract class ReasonResponder {
      *
      * @param remote_public the public RSA key to be added to the list of known keys
      */
-    public final void addRemote(String remote_public) {
+    public final void addKnown(String remote_public) {
         known.add(remote_public);
     }
 

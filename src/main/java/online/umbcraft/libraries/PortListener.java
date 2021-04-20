@@ -164,7 +164,11 @@ public class PortListener extends Thread {
                     job.receiveRemote();
 
                     error = RadioError.NO_VALID_REASON;
-                    if (!responders.containsKey(job.getRemoteReason())) throw new IllegalStateException();
+                    ReasonResponder responder = responders.get(job.getRemoteReason());
+                    if (responder == null) throw new IllegalStateException();
+
+                    error = RadioError.UNKNOWN_HOST;
+                    if(!responder.isKnown(job.getRemotePub())) throw new IllegalStateException();
 
                     HelpfulRSAKeyPair selfPair = responders.get(job.getRemoteReason()).getKeypair();
                     PublicKey remotePub = HelpfulRSAKeyPair.publicFrom64(job.getRemotePub());
@@ -195,7 +199,7 @@ public class PortListener extends Thread {
 
                 } catch (Exception e) {
                     e.printStackTrace();
-                    logger.severe(error.name() + " - " + e.getClass().getSimpleName());
+                    logger.severe("ERROR VALUE: " + error.name() + " - " + e.getClass().getSimpleName());
                 }
             });
         }

@@ -20,7 +20,7 @@ public class RadioTest {
 
         WalkieTalkie walkie = new WalkieTalkie();
 
-        walkie.addResponse(24000, new ReasonResponder("testsuite", server_keys) {
+        ReasonResponder responder = new ReasonResponder("testsuite", server_keys) {
 
             @Override
             public ResponseMessage response(ReasonMessage message) {
@@ -29,10 +29,14 @@ public class RadioTest {
                         .put("returnval", value * 2 + "")
                         .setSuccess(true);
             }
-        });
+        };
+        responder.addKnown(client_keys.pub64());
+
+        walkie.addResponse(24000, responder);
 
         String answer = null;
         boolean success = false;
+
         try {
             ResponseMessage sending = new ReasonMessage()
                     .setReason("testsuite")
@@ -46,6 +50,7 @@ public class RadioTest {
         } catch (InterruptedException | ExecutionException e) {
             e.printStackTrace();
         }
+
         Assert.assertTrue(success);
         Assert.assertEquals(answer, "4");
 
