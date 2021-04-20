@@ -140,7 +140,6 @@ public class PortListener extends Thread {
                 clientSocket = server_listener.accept();
             } catch (IOException e) {
 
-                e.printStackTrace();
                 logger.severe("issue receiving client on port " + PORT);
 
                 if (server_listener.isClosed()) {

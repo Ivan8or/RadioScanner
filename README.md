@@ -10,7 +10,7 @@ dependency group id: online.umbcraft.libraries
 
 dependency artifact Id: RadioScanner
 
-dependency version: 2.6.1
+dependency version: 3.0.1
 
 
 
@@ -18,293 +18,96 @@ BASIC DEMONSTRATION:
 =
 
 ```Java
+
+public class myClass {
 public static void main(String[] args) {
 
-        // creating a new keypair
-        // this is for test purposes, you would normally want to create a single keypair and store it
-        // instead of making a new one each time
-        
-        HelpfulRSAKeyPair keypair = new HelpfulRSAKeyPair();
-        
-        
+    // creating new keypairs
+    // this is for test purposes, you would normally want to create keypairs once and store them
+    // instead of making new ones each time
 
-        // creating the server side
-        
-        WalkieTalkie talkie = new WalkieTalkie(keypair);
+    HelpfulRSAKeyPair server_keypair = new HelpfulRSAKeyPair();
+    HelpfulRSAKeyPair client_keypair = new HelpfulRSAKeyPair();
 
 
+    // ------- creating the server side -------
+
+    WalkieTalkie talkie = new WalkieTalkie();
 
 
-        // adding a response to the main object
-        // also setting port on which this responder listens
-        
-        talkie.addResponse(25540,
-                new ReasonResponder("do_i_have_enough_animals") {
-                
-                
-                    // body of the response - this is where your own code should go!!
-                    @Override
-                    public RadioMessage response(RadioMessage message) {
-                    
-                        RadioMessage toReturn = new RadioMessage();
+    // creating a response for any messages with the reason "do_i_have_enough_pets?"
+    ReasonResponder my_reason = new ReasonResponder("do_i_have_enough_pets?", server_keypair) {
 
-                        String how_many_cats = message.get("cats_owned");
-                        String how_many_dogs = message.get("dogs_owned");
+        // body of the response - this is where your own code should go!!
+        @Override
+        public ResponseMessage response(ReasonMessage message) {
 
-                        int cats_int = 0;
-                        int dogs_int = 0;
-                        try {
-                            cats_int = Integer.parseInt(how_many_cats);
-                            dogs_int = Integer.parseInt(how_many_dogs);
+            ResponseMessage toReturn = new ResponseMessage()
+                    .put("enough_pets?", "no!")
+                    .setSuccess(true);
+            return toReturn;
 
-                        } catch (Exception e) {
-                            toReturn.put("success", "false");
-                            toReturn.put("fail-reason", "number convert error");
-                            return toReturn;
-                        }
-                        if (cats_int > 1)
-                            toReturn.put("enough_cats", "yes");
-                        else
-                            toReturn.put("enough_cats", "no");
-
-                        if (dogs_int > 1)
-                            toReturn.put("enough_dogs", "yes");
-                        else
-                            toReturn.put("enough_dogs", "no");
-                        return toReturn;
-                    }
-                }
-        );
-
-
-
-        // sending a 'do_i_have_enough_animals' message from a client
-        
-        RadioMessage toSend = new RadioMessage();
-
-
-
-        // setting reason (key val must be 'reason'), it's special!!!
-        
-        toSend.put("reason","do_i_have_enough_animals");
-
-
-
-        // setting other relevant data
-        
-        toSend.put("cats_owned", "2");
-        toSend.put("dogs_owned", "0");
-
-
-
-        // giving rsa keypair to message so it knows how to encrypt it
-        
-        toSend.setRSAKeys(keypair);
-
-
-
-        // sending the message to the server and getting a future back
-        
-        Future<RadioMessage> response = toSend.send("127.0.0.1", 25540);
-
-
-
-        // getting the value from the future! 
-        // (will block thread, so do only if you're okay with
-        // waiting for stuff to go over the network)
-        
-        RadioMessage response_msg = null;
-        try {
-            response_msg = response.get();
-        } catch (Exception e) {
-            e.printStackTrace();
         }
+    };
+
+    // telling server about the client public key in advance so it can recognize it
+    my_reason.addKnown(client_keypair.pub64());
+
+    // also setting port on which this responder listens
+    talkie.addResponse(25540, my_reason);
 
 
 
-        // displaying results to user
-        
-        String enough_cats = response_msg.get("enough_cats");
-        String enough_dogs = response_msg.get("enough_dogs");
-
-        System.out.println("response body!: "+response_msg);
-        System.out.println("enough cats? "+enough_cats);
-        System.out.println("enough dogs? "+enough_dogs);
 
 
 
-        // stop server since it will otherwise run forever
-        
-        talkie.stopListening();
+    // ------- creating the client side -------
+
+    // creating a message
+    ReasonMessage toSend = new ReasonMessage();
+
+
+    // setting reason
+    toSend.setReason("do_i_have_enough_pets?");
+
+
+    // you can fill the message with other data here if you need
+    // toSend.put("cats_owned", "2");
+    // toSend.put("dogs_owned", "0");
+
+
+    // giving the message it's client keypair so it can sign and decrypt
+    toSend.setRSAKeys(client_keypair);
+
+    // giving the message the remote public key so it can encrypt
+    toSend.setRemoteKey(server_keypair.pub());
+
+
+    // sending the message to the server and getting a future back
+    Future<ResponseMessage> response = toSend.send("127.0.0.1", 25540);
+
+
+    // getting the value from the future!
+    // (will block thread, so do only if you're okay with
+    // waiting for stuff to go over the network)
+
+    ResponseMessage response_msg = null;
+    try {
+        response_msg = response.get();
+    } catch (Exception e) {
+        e.printStackTrace();
+    }
+
+
+    // displaying results to user
+    System.out.println("what is the answer?: " + response_msg.get("enough_pets?"));
+
+
+    // stop server since it will otherwise listen forever
+    talkie.stopListening();
     }
 }
-
 ```
-
-
-
-WALKTHROUGH (SENDING MESSAGES):
-=
-
-
-1.1 create a new RadioMessage object passing in an RSA keypair to the constructor 
-
-```java
-HelpfulRSAKeyPair keypair = new HelpfulRSAKeyPair(public_key_b64, private_key_b64);
-RadioMessage message = new RadioMessage(keypair);
-```
-
-
-
-1.2 set a reason for the message to be sent
-
-```java
-message.put("reason", "do_i_have_enough_animals");
-```
-
-
-
-1.3 fill the message with any other string key-val pairs you want
-
-```java
-message.put("cats_owned", "2");
-message.put("dogs_owned", "0");
-```
-
-
-
-1.4 give the radio message your RSA keys so that it knows how to encrypt the message
-
-P.S. the keypair i am using in this example is NOT a real key pair (intentionally) and should NOT be used
-
-they are only here to get the point accross that you have to use the same keypair for 
-
-both sending messages AND for receiving messages... common sense!
-
-to generate a *REAL* keypair you can use the empty constructor from the HelpfulRSAKeyPair class `HelpfulRSAKeyPair pair = new HelpfulRSAKeyPair();`
-
-
-
-```java
-String rsa_public_key = "AAAAADADKAWDADWD;NOTAREALKEY";
-String rsa_private_key = "WNHEFUIWBUCLIWUCBWUK$CUBRCTVWTEFDHG;ALSONOTAREALKEY;THEREALONEISMUCHLONGER"; 
-
-HelpfulRSAKeyPair pair = new HelpfulRSAKeyPair(rsa_public_key, rsa_private_key);
-message.setRSAKeys(pair);
-```
-
-
-
-1.5 send the message to the correct IP / port
-
-```java
-Future<RadioMessage> response_future = message.send("192.168.1.75", 25540);
-```
-
-
-
-1.6 wait for the response the server sent you back in the form of a second radio message
-
-```java
-RadioMessage my_response = response_future.get();
-```
-
-
-
-1.7   get values out of the response and use them for whatever 
-
-```java
-String was_successful = my_response.get("success");
-String did_i_have_enough_cats = my_response.get("enough_cats");
-String did_i_have_enough_dogs = my_response.get("enough_dogs");
-```
-
-
-
-
-WALKTHROUGH (RECEIVING / RESPONDING TO MESSAGES):
-=
-
-
-2.1 create a WalkieTalkie object, with a constructor taking in your RSA public and private keys
-
-```java
-String rsa_public_key = "AAAAADADKAWDADWD;NOTAREALKEY";
-String rsa_private_key = "WNHEFUIWBUCLIWUCBWUK$CUBRCTVWTEFDHG;ALSONOTAREALKEY;THEREALONEISMUCHLONGER"; 
-
-HelpfulRSAKeyPair pair = new HelpfulRSAKeyPair(rsa_public_key, rsa_private_key);
-WalkieTalkie talkie = new WalkieTalkie(pair);
-```
-
-
-
-2.2 create some classes that extend ReasonResponder for every 'reason' a message would be sent:
-
-```java
-public class MyVeryOwnReasonRR extends ReasonResponder {
-
-
- // 2.3 override the 'response' function inside of the new MyVeryOwnReasonRR class
- // P.S. this is what gets called when a RadioMessage is received for the reason passed into the constructor
- 
- @Override
- public RadioMessage response(RadioMessage message) {
- 
-      // 2.4 creating a new RadioMessage to eventually be sent back to the original sender as a reply
-   
-      RadioMessage toReturn = new RadioMessage();
-      
-      
-     
-      
-      // 2.5 we are using the same message key values for #get(key) as under comment 1.3
-      
-      String how_many_cats = message.get("cats_owned"); 
-      String how_many_dogs = message.get("dogs_owned");
-      
-      int cats_int = 0;
-      int dogs_int = 0;
-      try {
-         cats_int = Integer.parseInt(how_many_cats);
-         dogs_int = Integer.parseInt(how_many_dogs);
-         
-      } catch(Exception e) {
-         toReturn.put("success", "false");
-         toReturn.put("fail-reason","number convert error");
-         return toReturn;
-      }
-      
-      
-      
-      // 2.6 filling up the toReturn with the data we want the original sender to receive back
-      if(cats_int > 1) 
-         toReturn.put("enough_cats","yes");
-      else 
-         toReturn.put("enough_cats","no");
-         
-      if(dogs_int > 1) 
-         toReturn.put("enough_dogs","yes");
-      else 
-         toReturn.put("enough_dogs","no");
-      
-      return toReturn;
- }
-}
-```
-
-
-2.7 after making your class that extends ReasonResponder, add an instance of it into your WalkieTalkie object:
-
-P.S. you also set the port on which the ReasonResponder is listening in this step
-
-P.S. see comment 1.2 uses "do_i_have_enough_animals" as the reason a request is being sent
-
-```java
-int WALKIE_PORT = 25540;
-walkie.addResponse(WALKIE_PORT,new MyVeryOwnReasonRR("do_i_have_enough_animals", this));
-```
-
-
 
 
 ERROR CHECKING:
@@ -317,6 +120,8 @@ return a Future that contains a radio message with the contents "TRANSMIT_ERROR"
 
 All of the errors are listed in the RadioError enum class.
 
+
+use the enableDebug() functions on the RadioMessage / WalkieTalkie class for more verbose logs
 
 
 
