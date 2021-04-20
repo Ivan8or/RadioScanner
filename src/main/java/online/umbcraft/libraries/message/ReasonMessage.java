@@ -1,6 +1,5 @@
 package online.umbcraft.libraries.message;
 
-import kong.unirest.json.JSONObject;
 import online.umbcraft.libraries.ProcessTimer;
 import online.umbcraft.libraries.RadioSocket;
 import online.umbcraft.libraries.ReasonResponder;
@@ -53,51 +52,6 @@ public class ReasonMessage extends RadioMessage {
         return message.getString("reason");
     }
 
-    @Override
-    public ReasonMessage put(String key, String val) {
-        if(key.equals("reason")) throw new IllegalArgumentException("reserved key");
-        super.put(key, val);
-        return this;
-    }
-
-    @Override
-    public ReasonMessage clear() {
-        super.clear();
-        return this;
-    }
-
-    @Override
-    public synchronized ReasonMessage setRSAKeys(String public_key, String private_key) {
-        super.setRSAKeys(public_key, private_key);
-        return this;
-    }
-
-    @Override
-    public synchronized ReasonMessage setRSAKeys(HelpfulRSAKeyPair keys) {
-        super.setRSAKeys(keys);
-        return this;
-    }
-
-    @Override
-    public ReasonMessage merge(RadioMessage other) {
-        super.merge(other);
-        return this;
-    }
-
-
-    @Override
-    public ReasonMessage enableDebug() {
-        super.enableDebug();
-        return this;
-    }
-
-
-    @Override
-    public ReasonMessage disableDebug() {
-        super.disableDebug();
-        return this;
-    }
-
 
     /**
      * encrypts and sends itself to a specified IP and port
@@ -128,28 +82,28 @@ public class ReasonMessage extends RadioMessage {
             RadioError error = RadioError.FAILED_TO_CONNECT;
 
             try {
-                job = new RadioSocket(IP, port, RSA_PAIR.pub(), RSA_PAIR.priv());
+                job = new RadioSocket(IP, port);
                 job.setMessage(message.toString(), getReason());
 
                 error = RadioError.BAD_CRYPT_KEY;
-                job.encodeMessage();
+                job.encodeMessage(RSA_PAIR.pub(), RSA_PAIR.priv());
 
                 error = RadioError.BAD_NETWORK_WRITE;
                 job.sendMessage();
 
                 error = RadioError.BAD_NETWORK_READ;
-                job.receiveResponse();
+                job.receiveRemote();
 
                 error = RadioError.BAD_CRYPT_KEY;
-                job.decodeResponse();
+                job.decodeRemote(RSA_PAIR.priv());
 
                 error = RadioError.INVALID_SIGNATURE;
-                job.verifySignature();
+                job.verifyRemoteSignature(RSA_PAIR.pub());
 
                 if (debug) logger.info("message to " + IP + ":" + port + " took " + timer.time() + " ms");
 
                 error = RadioError.INVALID_JSON;
-                toReturn = new ResponseMessage(job.getResponse());
+                toReturn = new ResponseMessage(job.getRemote());
 
             } catch (Exception e) {
                 if (debug) logger.severe(error.name());
@@ -158,7 +112,7 @@ public class ReasonMessage extends RadioMessage {
                         .put("TRANSMIT_ERROR", error.name());
 
                 if (error == RadioError.INVALID_JSON)
-                    toReturn.put("body", job.getResponse());
+                    toReturn.put("body", job.getRemote());
             }
 
             try {
@@ -213,5 +167,55 @@ public class ReasonMessage extends RadioMessage {
         }
 
         return send(ip, port);
+    }
+
+
+    @Override
+    public ReasonMessage put(String key, String val) {
+        if(key.equals("reason")) throw new IllegalArgumentException("reserved key");
+        super.put(key, val);
+        return this;
+    }
+
+
+    @Override
+    public ReasonMessage clear() {
+        super.clear();
+        return this;
+    }
+
+
+    @Override
+    public synchronized ReasonMessage setRSAKeys(String public_key, String private_key) {
+        super.setRSAKeys(public_key, private_key);
+        return this;
+    }
+
+
+    @Override
+    public synchronized ReasonMessage setRSAKeys(HelpfulRSAKeyPair keys) {
+        super.setRSAKeys(keys);
+        return this;
+    }
+
+
+    @Override
+    public ReasonMessage merge(RadioMessage other) {
+        super.merge(other);
+        return this;
+    }
+
+
+    @Override
+    public ReasonMessage enableDebug() {
+        super.enableDebug();
+        return this;
+    }
+
+
+    @Override
+    public ReasonMessage disableDebug() {
+        super.disableDebug();
+        return this;
     }
 }

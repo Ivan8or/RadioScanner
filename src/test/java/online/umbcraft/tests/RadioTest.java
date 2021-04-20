@@ -1,6 +1,5 @@
 package online.umbcraft.tests;
 
-import online.umbcraft.libraries.message.RadioMessage;
 import online.umbcraft.libraries.ReasonResponder;
 import online.umbcraft.libraries.WalkieTalkie;
 import online.umbcraft.libraries.encrypt.HelpfulRSAKeyPair;
@@ -26,12 +25,12 @@ public class RadioTest {
                 int value = Integer.parseInt(message.get("value"));
                 return new ResponseMessage()
                         .put("returnval",value*2+"")
-                        .put("success","true");
+                        .setSuccess(true);
             }
         });
 
         String answer = null;
-
+        boolean success = false;
         for(int i = 0; i < 5; i++) {
             try {
                 ResponseMessage sending = new ReasonMessage()
@@ -41,9 +40,11 @@ public class RadioTest {
                         .send("127.0.0.1:24000")
                         .get();
                 answer = sending.get("returnval");
+                success = sending.getSuccess();
             } catch (InterruptedException | ExecutionException e) {
                 e.printStackTrace();
             }
+            Assert.assertTrue(success);
             Assert.assertEquals(answer, ""+i*2);
         }
     }

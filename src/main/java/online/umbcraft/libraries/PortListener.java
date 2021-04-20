@@ -181,27 +181,26 @@ public class PortListener extends Thread {
                 final RadioSocket job;
                 RadioError error = RadioError.FAILED_TO_CONNECT;
                 try {
-                    job = new RadioSocket(clientSocket, RSA_PAIR.pub(), RSA_PAIR.priv());
+                    job = new RadioSocket(clientSocket);
 
                     error = RadioError.BAD_NETWORK_READ;
-                    job.receiveResponse();
+                    job.receiveRemote();
 
                     error = RadioError.BAD_CRYPT_KEY;
-                    job.decodeResponse();
-                    String messageBody = job.getResponse();
+                    job.decodeRemote(RSA_PAIR.priv());
+                    String messageBody = job.getRemote();
 
                     error = RadioError.INVALID_SIGNATURE;
-                    if (!job.verifySignature()) throw new InvalidKeyException();
+                    if (!job.verifyRemoteSignature(RSA_PAIR.pub())) throw new InvalidKeyException();
 
                     error = RadioError.ERROR_ON_RESPONSE;
                     ResponseMessage response = respond(new ReasonMessage(messageBody));
 
                     error = RadioError.INVALID_JSON;
-                    System.out.println(response.json());
                     job.setMessage(response.json(), "");
 
                     error = RadioError.BAD_CRYPT_KEY;
-                    job.encodeMessage();
+                    job.encodeMessage(RSA_PAIR.pub(), RSA_PAIR.priv());
 
                     error = RadioError.BAD_NETWORK_WRITE;
                     job.sendMessage();

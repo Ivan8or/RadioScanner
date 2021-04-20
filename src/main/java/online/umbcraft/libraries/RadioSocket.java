@@ -27,9 +27,6 @@ public class RadioSocket {
     final private ObjectOutputStream oos;
     final private ObjectInputStream ois;
 
-    final private PublicKey remote_pub;
-    final private PrivateKey self_priv;
-
     final private MessageData message;
     final private MessageData response;
 
@@ -38,16 +35,12 @@ public class RadioSocket {
      * Creates a RadioSocket from a Socket, and assigns it a remove public key and own private key to use while encrypting
      *
      * @param socket     Socket object to be used for the transaction
-     * @param remote_pub remote socket's public key, to be used for encrypting our message
-     * @param self_priv  our socket's private key, to be used for decrypting their message
      */
-    public RadioSocket(Socket socket, PublicKey remote_pub, PrivateKey self_priv) throws IOException {
+    public RadioSocket(Socket socket) throws IOException {
         this.socket = socket;
         socket.setSoTimeout(3000);
         oos = new ObjectOutputStream(socket.getOutputStream());
         ois = new ObjectInputStream(socket.getInputStream());
-        this.remote_pub = remote_pub;
-        this.self_priv = self_priv;
 
         message = new MessageData();
         response = new MessageData();
@@ -60,16 +53,12 @@ public class RadioSocket {
      *
      * @param ip         the IP to connect to
      * @param port       the port to connect to
-     * @param remote_pub remote socket's public key, to be used for encrypting our message
-     * @param self_priv  our socket's private key, to be used for decrypting their message
      */
-    public RadioSocket(final String ip, final int port, PublicKey remote_pub, PrivateKey self_priv) throws IOException {
+    public RadioSocket(final String ip, final int port) throws IOException {
         this.socket = new Socket(ip, port);
         socket.setSoTimeout(3000);
         oos = new ObjectOutputStream(socket.getOutputStream());
         ois = new ObjectInputStream(socket.getInputStream());
-        this.remote_pub = remote_pub;
-        this.self_priv = self_priv;
 
         message = new MessageData();
         response = new MessageData();
@@ -90,8 +79,10 @@ public class RadioSocket {
 
     /**
      * Encrypts and sends a message to the destination port
+     * @param remote_pub remote socket's public key, to be used for encrypting our message
+     * @param self_priv  our socket's private key, to be used for decrypting their message
      */
-    public void encodeMessage() throws InvalidKeyException, SignatureException, IOException {
+    public void encodeMessage(PublicKey remote_pub, PrivateKey self_priv) throws InvalidKeyException, SignatureException, IOException {
         message.key = new HelpfulAESKey();
         message.key_enc = MessageEncryptor.encryptRSA(remote_pub, message.key.key64());
         message.body_enc = MessageEncryptor.encryptAES(message.key, message.body);
@@ -117,7 +108,7 @@ public class RadioSocket {
     /**
      * receives a message from the remote port
      */
-    public void receiveResponse() throws IOException {
+    public void receiveRemote() throws IOException {
         response.reason = ois.readUTF();
         response.key_enc = ois.readUTF();
         response.signature = ois.readUTF();
@@ -127,8 +118,10 @@ public class RadioSocket {
 
     /**
      * decodes the received message body
+     *
+     * @param self_priv  our socket's private key, to be used for decrypting their message
      */
-    public void decodeResponse() throws BadPaddingException, InvalidKeyException {
+    public void decodeRemote(PrivateKey self_priv) throws BadPaddingException, InvalidKeyException {
         response.key = new HelpfulAESKey(MessageEncryptor.decryptRSA(self_priv, response.key_enc));
         response.body = MessageEncryptor.decryptAES(response.key, response.body_enc);
     }
@@ -137,14 +130,20 @@ public class RadioSocket {
     /**
      * verifies an RSA signature of the received body of text
      *
+     * @param remote_pub remote socket's public key, to be used for encrypting our message
+     *
      * @return whether the signature is valid
      */
-    public Boolean verifySignature() throws SignatureException, InvalidKeyException {
+    public Boolean verifyRemoteSignature(PublicKey remote_pub) throws SignatureException, InvalidKeyException {
         return MessageEncryptor.verifySignature(remote_pub, response.body, response.signature);
     }
 
-    public String getResponse() {
+    public String getRemote() {
         return response.body;
+    }
+
+    public String getRemoteReason() {
+        return response.reason;
     }
 
     /**

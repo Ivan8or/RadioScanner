@@ -21,12 +21,37 @@ public class ResponseMessage extends RadioMessage {
         super(json);
     }
 
+
+    /**
+     * sets the success status for this response
+     *
+     * @param success the new success status
+     * @return itself
+     */
+    public ResponseMessage setSuccess(boolean success) {
+        if (debug) logger.info("setting success " + success);
+        message.put("success", success);
+        return this;
+    }
+
+
+    /**
+     * gets the success status for this response
+     *
+     * @return whether this response was successful
+     */
+    public Boolean getSuccess() {
+        return message.getBoolean("success");
+    }
+
+
     @Override
     public ResponseMessage put(String key, String val) {
-        if(key.equals("reason")) throw new IllegalArgumentException("reserved key");
+        if(key.equals("success")) throw new IllegalArgumentException("reserved key");
         super.put(key, val);
         return this;
     }
+
 
     @Override
     public ResponseMessage clear() {
@@ -34,17 +59,20 @@ public class ResponseMessage extends RadioMessage {
         return this;
     }
 
+
     @Override
     public synchronized ResponseMessage setRSAKeys(String public_key, String private_key) {
         super.setRSAKeys(public_key, private_key);
         return this;
     }
 
+
     @Override
     public synchronized ResponseMessage setRSAKeys(HelpfulRSAKeyPair keys) {
         super.setRSAKeys(keys);
         return this;
     }
+
 
     @Override
     public ResponseMessage merge(RadioMessage other) {
@@ -65,5 +93,4 @@ public class ResponseMessage extends RadioMessage {
         super.disableDebug();
         return this;
     }
-    
 }
