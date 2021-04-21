@@ -27,7 +27,7 @@ dependencies {
 }
 
 group = 'online.umbcraft.libraries'
-version = '3.0.1'
+version = '3.0.2'
 description = 'RadioScanner'
 java.sourceCompatibility = JavaVersion.VERSION_1_8
 

@@ -1,12 +1,11 @@
-package online.umbcraft.libraries;
+package online.umbcraft.libraries.network.response;
 
 import online.umbcraft.libraries.encrypt.HelpfulRSAKeyPair;
-import online.umbcraft.libraries.message.RadioMessage;
-import online.umbcraft.libraries.message.ReasonMessage;
-import online.umbcraft.libraries.message.ResponseMessage;
+import online.umbcraft.libraries.network.message.RadioMessage;
+import online.umbcraft.libraries.network.message.ReasonMessage;
+import online.umbcraft.libraries.network.message.ResponseMessage;
 
 import java.security.PrivateKey;
-import java.security.PublicKey;
 import java.util.HashSet;
 import java.util.Set;
 

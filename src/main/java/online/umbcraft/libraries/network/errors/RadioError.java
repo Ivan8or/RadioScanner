@@ -1,8 +1,8 @@
-package online.umbcraft.libraries.errors;
+package online.umbcraft.libraries.network.errors;
 
 
-import online.umbcraft.libraries.message.RadioMessage;
-import online.umbcraft.libraries.ReasonResponder;
+import online.umbcraft.libraries.network.message.RadioMessage;
+import online.umbcraft.libraries.network.response.ReasonResponder;
 
 /**
  * All possible errors which can be returned by a failed{@link RadioMessage}<p>

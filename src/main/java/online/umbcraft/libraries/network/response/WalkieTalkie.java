@@ -1,6 +1,6 @@
-package online.umbcraft.libraries;
+package online.umbcraft.libraries.network.response;
 
-import online.umbcraft.libraries.message.RadioMessage;
+import online.umbcraft.libraries.network.message.RadioMessage;
 
 import java.util.Map;
 import java.util.TreeMap;

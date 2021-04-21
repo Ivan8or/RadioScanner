@@ -1,20 +1,20 @@
-package online.umbcraft.libraries;
+package online.umbcraft.libraries.network.response;
 
+import online.umbcraft.libraries.network.RadioSocket;
 import online.umbcraft.libraries.encrypt.HelpfulRSAKeyPair;
-import online.umbcraft.libraries.errors.RadioError;
-import online.umbcraft.libraries.message.RadioMessage;
-import online.umbcraft.libraries.message.ReasonMessage;
-import online.umbcraft.libraries.message.ResponseMessage;
+import online.umbcraft.libraries.network.errors.RadioError;
+import online.umbcraft.libraries.network.message.RadioMessage;
+import online.umbcraft.libraries.network.message.ReasonMessage;
+import online.umbcraft.libraries.network.message.ResponseMessage;
 
 import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.security.InvalidKeyException;
-import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.Map;
+import java.util.TreeMap;
 import java.util.logging.Logger;
 
 
@@ -43,7 +43,7 @@ public class PortListener extends Thread {
      */
     public PortListener(WalkieTalkie talkie, int port) {
         this.talkie = talkie;
-        responders = new HashMap<>(5);
+        responders = new TreeMap<>();
         this.PORT = port;
     }
 

@@ -1,11 +1,11 @@
-package online.umbcraft.libraries.message;
+package online.umbcraft.libraries.network.message;
 
 import online.umbcraft.libraries.ProcessTimer;
-import online.umbcraft.libraries.RadioSocket;
-import online.umbcraft.libraries.ReasonResponder;
-import online.umbcraft.libraries.WalkieTalkie;
+import online.umbcraft.libraries.network.RadioSocket;
+import online.umbcraft.libraries.network.response.ReasonResponder;
+import online.umbcraft.libraries.network.response.WalkieTalkie;
 import online.umbcraft.libraries.encrypt.HelpfulRSAKeyPair;
-import online.umbcraft.libraries.errors.RadioError;
+import online.umbcraft.libraries.network.errors.RadioError;
 
 import java.io.IOException;
 import java.security.PublicKey;

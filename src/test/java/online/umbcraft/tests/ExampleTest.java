@@ -1,11 +1,11 @@
 package online.umbcraft.tests;
 
-import online.umbcraft.libraries.ReasonResponder;
-import online.umbcraft.libraries.WalkieTalkie;
+import online.umbcraft.libraries.network.response.ReasonResponder;
+import online.umbcraft.libraries.network.response.WalkieTalkie;
 import online.umbcraft.libraries.encrypt.HelpfulRSAKeyPair;
-import online.umbcraft.libraries.message.RadioMessage;
-import online.umbcraft.libraries.message.ReasonMessage;
-import online.umbcraft.libraries.message.ResponseMessage;
+import online.umbcraft.libraries.network.message.ReasonMessage;
+import online.umbcraft.libraries.network.message.ResponseMessage;
+import org.junit.Assert;
 import org.junit.Test;
 
 import java.util.concurrent.Future;
@@ -92,10 +92,17 @@ public class ExampleTest {
 
 
         // displaying results to user
-        System.out.println("what is the answer?: " + response_msg.get("enough_pets?"));
+        //System.out.println("what is the answer?: " + response_msg.get("enough_pets?"));
+
+
+
+        //JUnit test; feel free to delete this if copy-pasting!
+        Assert.assertEquals(response_msg.get("enough_pets?"), "no!");
+
+
 
 
         // stop server since it will otherwise listen forever
-        talkie.stopListening();
+        //talkie.stopListening();
     }
 }

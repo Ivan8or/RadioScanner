@@ -1,10 +1,10 @@
 package online.umbcraft.tests;
 
-import online.umbcraft.libraries.ReasonResponder;
-import online.umbcraft.libraries.WalkieTalkie;
+import online.umbcraft.libraries.network.response.ReasonResponder;
+import online.umbcraft.libraries.network.response.WalkieTalkie;
 import online.umbcraft.libraries.encrypt.HelpfulRSAKeyPair;
-import online.umbcraft.libraries.message.ReasonMessage;
-import online.umbcraft.libraries.message.ResponseMessage;
+import online.umbcraft.libraries.network.message.ReasonMessage;
+import online.umbcraft.libraries.network.message.ResponseMessage;
 import org.junit.Assert;
 import org.junit.Test;
 

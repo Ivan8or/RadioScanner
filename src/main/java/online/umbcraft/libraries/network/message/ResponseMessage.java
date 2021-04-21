@@ -1,6 +1,4 @@
-package online.umbcraft.libraries.message;
-
-import online.umbcraft.libraries.encrypt.HelpfulRSAKeyPair;
+package online.umbcraft.libraries.network.message;
 
 public class ResponseMessage extends RadioMessage {
 

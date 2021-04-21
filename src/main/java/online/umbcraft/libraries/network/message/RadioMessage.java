@@ -1,10 +1,9 @@
-package online.umbcraft.libraries.message;
+package online.umbcraft.libraries.network.message;
 
 import kong.unirest.json.JSONException;
 import kong.unirest.json.JSONObject;
-import online.umbcraft.libraries.ReasonResponder;
-import online.umbcraft.libraries.WalkieTalkie;
-import online.umbcraft.libraries.encrypt.HelpfulRSAKeyPair;
+import online.umbcraft.libraries.network.response.ReasonResponder;
+import online.umbcraft.libraries.network.response.WalkieTalkie;
 
 import java.util.logging.Logger;
 
