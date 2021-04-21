@@ -3,14 +3,25 @@ A simplified way to have message->response java networking!
 
 maven repo / dependencies:
 =
+```
+<repositories>
+        <repository>
+            <id>umbcraft-repo</id>
+            <url>https://nexus.umbcraft.online/repository/umbcraft-pub/</url>
+        </repository>
+</repositories>
+```
 
-repo url https://nexus.umbcraft.online/repository/umbcraft-pub/
 
-dependency group id: online.umbcraft.libraries
-
-dependency artifact Id: RadioScanner
-
-dependency version: 3.0.1
+```
+<dependencies>
+        <dependency>
+            <groupId>online.umbcraft.libraries</groupId>
+            <artifactId>RadioScanner</artifactId>
+            <version>3.0.1</version>
+        </dependency>
+</dependencies>
+```
 
 
 
