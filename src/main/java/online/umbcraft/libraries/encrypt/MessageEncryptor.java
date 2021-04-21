@@ -8,7 +8,7 @@ import java.security.*;
 import javax.crypto.*;
 
 /**
- * Handles AES, RSA encrypting, decrypting, and RSA signing Strings<p>
+ * <p>Handles AES, RSA encrypting, decrypting, and RSA signing Strings</p>
  */
 public class MessageEncryptor {
 
@@ -19,6 +19,8 @@ public class MessageEncryptor {
      * @param pair  the RSA keypair from which the private key is used to make the signature
      * @param input the raw string input
      * @return the signature encoded in base64
+     * @throws InvalidKeyException if the key is bad
+     * @throws SignatureException  if something went wrong performing the signature
      */
     public static String generateSignature(HelpfulRSAKeyPair pair, String input) throws InvalidKeyException, SignatureException {
         return generateSignature(pair.priv(), input);
@@ -31,6 +33,8 @@ public class MessageEncryptor {
      * @param key   the private RSA key used to make the signature
      * @param input the raw string input
      * @return the signature encoded in base64
+     * @throws InvalidKeyException if the key is bad
+     * @throws SignatureException  if something went wrong performing the signature
      */
     public static String generateSignature(PrivateKey key, String input) throws InvalidKeyException, SignatureException {
         try {
@@ -54,6 +58,8 @@ public class MessageEncryptor {
      * @param input         the raw string which was signed
      * @param signature_b64 the signature in question (encoded in base64)
      * @return whether or not the signature is valid
+     * @throws InvalidKeyException if key is bad
+     * @throws SignatureException if something went wrong while signing
      */
     public static boolean verifySignature(HelpfulRSAKeyPair pair, String input, String signature_b64) throws InvalidKeyException, SignatureException {
         return verifySignature(pair.pub(), input, signature_b64);
@@ -67,6 +73,8 @@ public class MessageEncryptor {
      * @param input         the raw string which was signed
      * @param signature_b64 the signature in question (encoded in base64)
      * @return whether or not the signature is valid
+     * @throws InvalidKeyException if key is bad
+     * @throws SignatureException if something went wrong while signing
      */
     public static boolean verifySignature(PublicKey key, String input, String signature_b64) throws InvalidKeyException, SignatureException {
         try {
@@ -88,6 +96,7 @@ public class MessageEncryptor {
      * @param AESkey the base64 encoded AES key to be used
      * @param input  the raw text input
      * @return the encrypted string (encoded in base64)
+     * @throws InvalidKeyException if AES key is bad
      */
     public static String encryptAES(HelpfulAESKey AESkey, String input) throws InvalidKeyException {
         SecretKey key = AESkey.key();
@@ -115,6 +124,7 @@ public class MessageEncryptor {
      * @param input the raw text input
      * @param pair  the RSA keypair from which the public key will be used to encrypt
      * @return the encrypted string (encoded in base64)
+     * @throws InvalidKeyException if RSA key is bad
      */
     public static String encryptRSA(HelpfulRSAKeyPair pair, String input) throws InvalidKeyException {
         return encryptRSA(pair.pub(), input);
@@ -127,6 +137,7 @@ public class MessageEncryptor {
      * @param input the raw text input
      * @param key   the RSA key used to encrypt the message
      * @return the encrypted string (encoded in base64)
+     * @throws InvalidKeyException if RSA key is bad
      */
     public static String encryptRSA(PublicKey key, String input) throws InvalidKeyException {
 
@@ -156,8 +167,9 @@ public class MessageEncryptor {
      * @param AESkey    the AES key to be used to decrypt
      * @param input_b64 the base64 encoded encrypted string
      * @return the raw decrypted string
+     * @throws InvalidKeyException if AES key is bad
      */
-    public static String decryptAES(HelpfulAESKey AESkey, String input_b64) throws InvalidKeyException, BadPaddingException {
+    public static String decryptAES(HelpfulAESKey AESkey, String input_b64) throws InvalidKeyException {
 
         SecretKey key = AESkey.key();
         byte[] plainText = new byte[0];
@@ -170,7 +182,7 @@ public class MessageEncryptor {
             plainText = cipher.doFinal(Base64.decodeBase64(input_b64));
 
         } catch (NoSuchAlgorithmException | NoSuchPaddingException
-                | IllegalBlockSizeException e) {
+                | IllegalBlockSizeException | BadPaddingException e) {
             e.printStackTrace();
         }
         return new String(plainText);
@@ -183,8 +195,9 @@ public class MessageEncryptor {
      * @param pair      the keypair containing the private key to be used to decrypt
      * @param input_b64 the base64 encoded encrypted string
      * @return the raw decrypted string
+     * @throws InvalidKeyException if the RSA private key is bad
      */
-    public static String decryptRSA(HelpfulRSAKeyPair pair, String input_b64) throws InvalidKeyException, BadPaddingException {
+    public static String decryptRSA(HelpfulRSAKeyPair pair, String input_b64) throws InvalidKeyException {
         return decryptRSA(pair.priv(), input_b64);
     }
 
@@ -195,8 +208,9 @@ public class MessageEncryptor {
      * @param key       the private RSA key to be used to decrypt
      * @param input_b64 the base64 encoded encrypted string
      * @return the raw decrypted string
+     * @throws InvalidKeyException if the RSA private key is bad
      */
-    public static String decryptRSA(PrivateKey key, String input_b64) throws InvalidKeyException, BadPaddingException {
+    public static String decryptRSA(PrivateKey key, String input_b64) throws InvalidKeyException {
 
         PrivateKey private_key = key;
         byte[] plainText = new byte[0];
@@ -208,7 +222,7 @@ public class MessageEncryptor {
             plainText = cipher.doFinal(Base64.decodeBase64(input_b64));
 
         } catch (NoSuchAlgorithmException | NoSuchPaddingException
-                | IllegalBlockSizeException e) {
+                | IllegalBlockSizeException | BadPaddingException e) {
 
             e.printStackTrace();
         }

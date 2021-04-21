@@ -9,6 +9,7 @@ import online.umbcraft.libraries.network.errors.RadioError;
 
 import java.io.IOException;
 import java.security.PublicKey;
+import java.security.spec.InvalidKeySpecException;
 import java.util.concurrent.Future;
 
 public class ReasonMessage extends RadioMessage {
@@ -61,7 +62,7 @@ public class ReasonMessage extends RadioMessage {
      * @param private_key private RSA key in base64
      * @return itself
      */
-    public ReasonMessage setRSAKeys(String public_key, String private_key) {
+    public ReasonMessage setRSAKeys(String public_key, String private_key) throws InvalidKeySpecException {
         return setRSAKeys(new HelpfulRSAKeyPair(public_key, private_key));
     }
 
@@ -133,11 +134,11 @@ public class ReasonMessage extends RadioMessage {
                 error = RadioError.BAD_NETWORK_READ;
                 job.receiveRemote();
 
-                error = RadioError.BAD_CRYPT_KEY;
-                job.decodeRemote(keypair.priv());
-
                 error = RadioError.INVALID_SIGNATURE;
                 job.verifyRemoteSignature(remotePub);
+
+                error = RadioError.BAD_CRYPT_KEY;
+                job.decodeRemote(keypair.priv());
 
                 if (debug) logger.info("message to " + IP + ":" + port + " took " + timer.time() + " ms");
 

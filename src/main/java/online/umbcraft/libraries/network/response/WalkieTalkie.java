@@ -10,9 +10,9 @@ import java.util.logging.Logger;
 
 
 /**
- * Handles all responding to {@link RadioMessage} messages <p>
- * <p>
- * holds multiple {@link ReasonResponder}instances<p>
+ * <p> Handles all responding to {@link RadioMessage} messages  </p>
+ *
+ * <p> holds multiple {@link ReasonResponder}instances </p>
  * Also holds a static instance of {@link ExecutorService},
  * which other RadioScanner classes use to run events asynchronously.
  *

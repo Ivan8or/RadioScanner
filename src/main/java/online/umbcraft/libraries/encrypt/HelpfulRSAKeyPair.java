@@ -9,7 +9,7 @@ import java.security.spec.X509EncodedKeySpec;
 
 
 /**
- * Wrapper class for a single RSA keypair<p>
+ * <p>Wrapper class for a single RSA keypair</p>
  */
 public class HelpfulRSAKeyPair {
 
@@ -44,7 +44,7 @@ public class HelpfulRSAKeyPair {
      * @param pub_key_b64  the public RSA key encoded in base64
      * @param priv_key_b64 the private RSA key encoded in base64
      */
-    public HelpfulRSAKeyPair(String pub_key_b64, String priv_key_b64) {
+    public HelpfulRSAKeyPair(String pub_key_b64, String priv_key_b64) throws InvalidKeySpecException {
 
         PUBLIC_KEY = publicFrom64(pub_key_b64);
         PRIVATE_KEY = privateFrom64(priv_key_b64);
@@ -70,14 +70,14 @@ public class HelpfulRSAKeyPair {
      * @param pub_b64 the public RSA key encoded in base64
      * @return the created PublicKey object
      */
-    public static PublicKey publicFrom64(String pub_b64) {
+    public static PublicKey publicFrom64(String pub_b64) throws InvalidKeySpecException {
 
         PublicKey newPublic = null;
 
         try {
             newPublic = KeyFactory.getInstance("RSA").generatePublic(
                     new X509EncodedKeySpec(Base64.decodeBase64(pub_b64)));
-        } catch (NoSuchAlgorithmException | InvalidKeySpecException e) {
+        } catch (NoSuchAlgorithmException e) {
             e.printStackTrace();
         }
         return newPublic;
@@ -90,7 +90,7 @@ public class HelpfulRSAKeyPair {
      * @param priv_b64 the private RSA key encoded in base64
      * @return the created PrivateKey object
      */
-    public static PrivateKey privateFrom64(String priv_b64) {
+    public static PrivateKey privateFrom64(String priv_b64) throws InvalidKeySpecException {
 
         PrivateKey newPrivate = null;
 
@@ -99,7 +99,7 @@ public class HelpfulRSAKeyPair {
             newPrivate = KeyFactory.getInstance("RSA").generatePrivate(
                     new PKCS8EncodedKeySpec(Base64.decodeBase64(priv_b64)));
 
-        } catch (NoSuchAlgorithmException | InvalidKeySpecException e) {
+        } catch (NoSuchAlgorithmException e) {
             e.printStackTrace();
         }
         return newPrivate;

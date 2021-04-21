@@ -5,8 +5,8 @@ import online.umbcraft.libraries.network.message.RadioMessage;
 import online.umbcraft.libraries.network.response.ReasonResponder;
 
 /**
- * All possible errors which can be returned by a failed{@link RadioMessage}<p>
- * the format that the{@link RadioMessage} will contain the error in is:<p>
+ * <p> All possible errors which can be returned by a failed{@link RadioMessage} </p>
+ * <p> the format that the{@link RadioMessage} will contain the error in is: </p>
  * "TRANSMIT_ERROR" = "{@link RadioError}"
  */
 public enum RadioError {

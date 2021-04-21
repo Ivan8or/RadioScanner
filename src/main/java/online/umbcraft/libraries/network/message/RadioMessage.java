@@ -9,13 +9,13 @@ import java.util.logging.Logger;
 
 
 /**
- * A key-value based text message that can be sent over the network <p>
- * <p>
- * Messages are collections of string key-value pairs<p>
- * The unspoken standard for messages is that:<p>
- * - each request message must include a 'reason',<p>
- * - each response message must include a 'success',<p>
- * - and if the success is false then the 'reason' for that failure<p>
+ * <p>A key-value based text message that can be sent over the network </p>
+ *
+ * <p> Messages are collections of string key-value pairs </p>
+ * <p> The unspoken standard for messages is that: </p>
+ * <p> - each request message must include a 'reason', </p>
+ * <p> - each response message must include a 'success', </p>
+ * <p> - and if the success is false then the 'reason' for that failure </p>
  * when {@link RadioMessage}s are sent they return a Future containing the response from the receiver
  *
  * @see ReasonResponder
@@ -47,7 +47,7 @@ public class RadioMessage {
 
 
     /**
-     * empties the RadioMessage of all key-value pairs<p>
+     * <p> empties the RadioMessage of all key-value pairs </p>
      * does not reset the RSA keys or debug status
      *
      * @return itself

@@ -7,9 +7,9 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import javax.crypto.BadPaddingException;
 import java.security.InvalidKeyException;
 import java.security.SignatureException;
+import java.security.spec.InvalidKeySpecException;
 
 public class EncryptorTest {
 
@@ -42,14 +42,34 @@ public class EncryptorTest {
 
     @Test
     public void initHelpfuls() {
-        HelpfulRSAKeyPair pair = new HelpfulRSAKeyPair(public_key, private_key);
-        HelpfulAESKey key = new HelpfulAESKey(aeskey);
+        HelpfulRSAKeyPair pair = null;
+        HelpfulAESKey key = null;
+        try {
+            pair = new HelpfulRSAKeyPair(public_key, private_key);
+            key = new HelpfulAESKey(aeskey);
+        }catch(InvalidKeySpecException e) {
+            e.printStackTrace();
+        }
 
         Assert.assertEquals(pair.pub64(), public_key);
         Assert.assertEquals(pair.priv64(), private_key);
         Assert.assertEquals(key.key64(), aeskey);
     }
 
+
+    @Test
+    public void AESSizes() {
+
+        HelpfulAESKey key128 = new HelpfulAESKey(128);
+        Assert.assertEquals(key128.key64().length(), 24);
+
+        HelpfulAESKey key192 = new HelpfulAESKey(192);
+        Assert.assertEquals(key192.key64().length(), 32);
+
+        HelpfulAESKey key256 = new HelpfulAESKey(256);
+        Assert.assertEquals(key256.key64().length(), 44);
+
+    }
 
     @Test
     public void AESencrypt() {
@@ -62,7 +82,6 @@ public class EncryptorTest {
         } catch (InvalidKeyException e) {
             e.printStackTrace();
         }
-
         Assert.assertEquals(result, message_aes);
     }
 
@@ -75,39 +94,60 @@ public class EncryptorTest {
         String result = null;
         try {
             result = MessageEncryptor.decryptAES(aesk, message_aes);
-        } catch (InvalidKeyException | BadPaddingException e) {
+        } catch (InvalidKeyException e) {
             e.printStackTrace();
         }
 
         Assert.assertEquals(result, message);
+    }
+
+    @Test
+    public void RSABadKeyCheck() {
+        try {
+            HelpfulRSAKeyPair.publicFrom64(aeskey);
+        } catch (InvalidKeySpecException e) {
+            return;
+        }
+        Assert.fail();
+    }
+
+    @Test
+    public void AESBadKeyCheck() {
+        try {
+            HelpfulAESKey.keyFrom64("aaa");
+        } catch (IllegalArgumentException e) {
+            return;
+        }
+        Assert.fail();
     }
 
 
     @Test
     public void RSAdecrypt() {
 
-        HelpfulRSAKeyPair pair = new HelpfulRSAKeyPair(public_key, private_key);
-
         String result = null;
         try {
+            HelpfulRSAKeyPair pair = new HelpfulRSAKeyPair(public_key, private_key);
             result = MessageEncryptor.decryptRSA(pair, message_rsa);
-        } catch (InvalidKeyException | BadPaddingException e) {
+
+        } catch (InvalidKeyException | InvalidKeySpecException e) {
             e.printStackTrace();
         }
-
         Assert.assertEquals(result, message);
     }
 
 
     @Test
     public void RSAencryptDecrypt() {
-        HelpfulRSAKeyPair pair = new HelpfulRSAKeyPair(public_key, private_key);
 
         String result = null;
         try {
+            HelpfulRSAKeyPair pair = new HelpfulRSAKeyPair(public_key, private_key);
             String encrypted = MessageEncryptor.encryptRSA(pair, message);
+
             result = MessageEncryptor.decryptRSA(pair, encrypted);
-        } catch (InvalidKeyException | BadPaddingException e) {
+
+        } catch (InvalidKeyException | InvalidKeySpecException e) {
             e.printStackTrace();
         }
 
@@ -116,12 +156,13 @@ public class EncryptorTest {
 
     @Test
     public void signatureGenerate() {
-        HelpfulRSAKeyPair pair = new HelpfulRSAKeyPair(public_key, private_key);
 
         String signature = null;
         try {
+            HelpfulRSAKeyPair pair = new HelpfulRSAKeyPair(public_key, private_key);
             signature = MessageEncryptor.generateSignature(pair, message);
-        } catch (InvalidKeyException | SignatureException e) {
+
+        } catch (InvalidKeyException | SignatureException | InvalidKeySpecException e) {
             e.printStackTrace();
         }
 
@@ -131,35 +172,42 @@ public class EncryptorTest {
     @Test
     public void signatureVerify() {
 
-        HelpfulRSAKeyPair pair = new HelpfulRSAKeyPair(public_key, private_key);
-
         boolean result = false;
         try {
+            HelpfulRSAKeyPair pair = new HelpfulRSAKeyPair(public_key, private_key);
             result = MessageEncryptor.verifySignature(pair, message, message_sig);
-        } catch (InvalidKeyException | SignatureException e) {
+
+        } catch (InvalidKeyException | SignatureException | InvalidKeySpecException e) {
             e.printStackTrace();
         }
-
         Assert.assertTrue(result);
     }
 
 
     @Test
-    public void signatureGenerateVerify() {
-
-        HelpfulRSAKeyPair pair = new HelpfulRSAKeyPair(public_key, private_key);
+    public void signatureGenerateAndVerify() {
 
         boolean result = false;
         try {
+            HelpfulRSAKeyPair pair = new HelpfulRSAKeyPair(public_key, private_key);
             String sig = MessageEncryptor.generateSignature(pair, message);
+
             result = MessageEncryptor.verifySignature(pair, message, sig);
-        } catch (InvalidKeyException | SignatureException e) {
+
+        } catch (InvalidKeyException | SignatureException | InvalidKeySpecException e) {
             e.printStackTrace();
         }
 
         Assert.assertTrue(result);
     }
 
+    @Test
+    public void speedComparison() {
+
+
+
+
+    }
 
 
 }

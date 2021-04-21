@@ -19,7 +19,7 @@ import java.util.logging.Logger;
 
 
 /**
- * Passes any incoming message on a single port to the appropriate {@link ReasonResponder}
+ * <p> Passes any incoming message on a single port to the appropriate {@link ReasonResponder} </p>
  * <p>
  * The server listener for a single port
  * can contain multiple responders, one for any unique message reason
@@ -36,10 +36,10 @@ public class PortListener extends Thread {
 
 
     /**
-     * Creates an empty PortListener<p>
+     * <p> Creates an empty PortListener </p>
      *
-     * @param talkie       the {@link WalkieTalkie} instance this belongs to<p>
-     * @param port         the port this listens on
+     * @param talkie <p> the {@link WalkieTalkie} instance this belongs to </p>
+     * @param port   the port this listens on
      */
     public PortListener(WalkieTalkie talkie, int port) {
         this.talkie = talkie;
@@ -80,7 +80,7 @@ public class PortListener extends Thread {
 
 
     /**
-     * Closes the server socket on this port<p>
+     * <p> Closes the server socket on this port </p>
      * this cannot be undone
      */
     public void stopListening() {
@@ -122,7 +122,7 @@ public class PortListener extends Thread {
 
 
     /**
-     * starts listening for {@link RadioMessage}s and responds with {@link ReasonResponder}s<p>
+     * <p> starts listening for {@link RadioMessage}s and responds with {@link ReasonResponder}s </p>
      */
     @Override
     public void run() {
@@ -164,19 +164,20 @@ public class PortListener extends Thread {
 
                     error = RadioError.NO_VALID_REASON;
                     ReasonResponder responder = responders.get(job.getRemoteReason());
-                    if (responder == null) throw new IllegalStateException();
+                    if (responder == null) throw new IllegalStateException("no valid reason specified");
 
                     error = RadioError.UNKNOWN_HOST;
-                    if(!responder.isKnown(job.getRemotePub())) throw new IllegalStateException();
-
-                    HelpfulRSAKeyPair selfPair = responders.get(job.getRemoteReason()).getKeypair();
                     PublicKey remotePub = HelpfulRSAKeyPair.publicFrom64(job.getRemotePub());
+                    if (job.getRemotePub() == null) throw new IllegalStateException("no host key specified");
+                    if (!responder.isKnown(job.getRemotePub())) throw new IllegalStateException("host key is not recognized");
+
+                    error = RadioError.INVALID_SIGNATURE;
+                    if (!job.verifyRemoteSignature(remotePub)) throw new InvalidKeyException("message signature is invalid");
+
+                    HelpfulRSAKeyPair selfPair = responder.getKeypair();
 
                     error = RadioError.BAD_CRYPT_KEY;
                     job.decodeRemote(selfPair.priv());
-
-                    error = RadioError.INVALID_SIGNATURE;
-                    if (!job.verifyRemoteSignature(remotePub)) throw new InvalidKeyException();
 
                     error = RadioError.INVALID_JSON;
                     ReasonMessage message = new ReasonMessage(job.getRemoteBody());

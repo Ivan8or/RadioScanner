@@ -6,10 +6,11 @@ import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 import java.security.NoSuchAlgorithmException;
+import java.security.spec.InvalidKeySpecException;
 
 
 /**
- * Wrapper class for a single AES key<p>
+ * <p>Wrapper class for a single AES key</p>
  */
 public class HelpfulAESKey {
 
@@ -29,6 +30,24 @@ public class HelpfulAESKey {
         }
 
         generator.init(128);
+        AES_KEY = generator.generateKey();
+    }
+
+
+    /**
+     * Creates a {@link HelpfulRSAKeyPair} containing a randomly generated key of a certain size
+     *
+     * @param size the size of the key in bits
+     */
+    public HelpfulAESKey(int size) {
+        KeyGenerator generator = null;
+        try {
+            generator = KeyGenerator.getInstance("AES");
+        } catch (NoSuchAlgorithmException e) {
+            e.printStackTrace();
+        }
+
+        generator.init(size);
         AES_KEY = generator.generateKey();
     }
 
@@ -59,7 +78,7 @@ public class HelpfulAESKey {
      * @param key_b64 base64 encoded AES key
      * @return the resulting SecretKey
      */
-    public SecretKey keyFrom64(String key_b64) {
+    public static SecretKey keyFrom64(String key_b64) throws IllegalArgumentException {
         byte[] key_bytes = Base64.decodeBase64(key_b64);
         return new SecretKeySpec(key_bytes, 0, key_bytes.length, "AES");
     }

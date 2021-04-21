@@ -10,7 +10,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 /**
- * Responsible for responding to a single type/reason of {@link RadioMessage}<p>
+ * <p> Responsible for responding to a single type/reason of {@link RadioMessage} </p>
  * Extend this class to add custom logic for whenever a RadioMessage is received
  *
  * @see ReasonResponder
@@ -26,7 +26,7 @@ public abstract class ReasonResponder {
     /**
      * Creates a blank ReasonResponder and sets the reason
      *
-     * @param reason String which if any {@link RadioMessage}<p> share, this will reply to them
+     * @param reason <p> String which if any {@link RadioMessage} </p> share, this will reply to them
      * @param pair   the RSA keyset used to encode / decode messages
      */
     public ReasonResponder(String reason, HelpfulRSAKeyPair pair) {
