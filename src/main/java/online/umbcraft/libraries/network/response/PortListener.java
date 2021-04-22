@@ -167,8 +167,8 @@ public class PortListener extends Thread {
                     if (responder == null) throw new IllegalStateException("no valid reason specified");
 
                     error = RadioError.UNKNOWN_HOST;
-                    PublicKey remotePub = HelpfulRSAKeyPair.publicFrom64(job.getRemotePub());
                     if (job.getRemotePub() == null) throw new IllegalStateException("no host key specified");
+                    PublicKey remotePub = HelpfulRSAKeyPair.publicFrom64(job.getRemotePub());
                     if (!responder.isKnown(job.getRemotePub())) throw new IllegalStateException("host key is not recognized");
 
                     error = RadioError.INVALID_SIGNATURE;
