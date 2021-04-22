@@ -19,6 +19,17 @@ public class ResponseMessage extends RadioMessage {
         super(json);
     }
 
+    /**
+     * gets the success status for this response
+     *
+     * @return whether this response was successful
+     */
+    public Boolean getSuccess() {
+        if (message.has("success"))
+            return message.getBoolean("success");
+        return false;
+    }
+
 
     /**
      * sets the success status for this response
@@ -34,20 +45,16 @@ public class ResponseMessage extends RadioMessage {
 
 
     /**
-     * gets the success status for this response
+     * <p> adds a new key/value pair to the message </p>
+     * reserved keys: 'success'
      *
-     * @return whether this response was successful
+     * @param key message key
+     * @param val message value
+     * @return itself
      */
-    public Boolean getSuccess() {
-        if(message.has("success"))
-            return message.getBoolean("success");
-        return false;
-    }
-
-
     @Override
     public ResponseMessage put(String key, String val) {
-        if(key.equals("success")) throw new IllegalArgumentException("reserved key");
+        if (key.equals("success")) throw new IllegalArgumentException("reserved key");
         super.put(key, val);
         return this;
     }

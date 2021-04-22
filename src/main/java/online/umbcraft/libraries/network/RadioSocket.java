@@ -143,7 +143,7 @@ public class RadioSocket {
      *
      * @param remote_pub remote socket's public key, to be used for encrypting our message
      * @return whether the signature is valid
-     * @throws SignatureException if the signature couldn't be validated
+     * @throws SignatureException  if the signature couldn't be validated
      * @throws InvalidKeyException if the public key is bad
      */
     public Boolean verifyRemoteSignature(PublicKey remote_pub) throws SignatureException, InvalidKeyException {
@@ -152,6 +152,7 @@ public class RadioSocket {
 
     /**
      * get the remote body
+     *
      * @return the body of the remote message
      */
     public String getRemoteBody() {
@@ -160,6 +161,7 @@ public class RadioSocket {
 
     /**
      * get the remote reason
+     *
      * @return the reason for the remote message being sent
      */
     public String getRemoteReason() {
@@ -168,14 +170,16 @@ public class RadioSocket {
 
     /**
      * get the remote public key
+     *
      * @return the public key received from the remote message
      */
-    public String getRemotePub() {
+    public String getRemotePub64() {
         return remote.public_key;
     }
 
     /**
      * closes all streams / sockets used by this object
+     *
      * @throws IOException if something goes wrong while closing the socket / io streams
      */
     public void close() throws IOException {

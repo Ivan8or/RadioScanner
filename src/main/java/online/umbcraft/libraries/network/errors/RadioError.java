@@ -56,6 +56,12 @@ public enum RadioError {
 
 
     /**
+     * the remote message did not specify it's public key
+     */
+    NO_HOST_KEY,
+
+
+    /**
      * {@link RadioMessage} the json format of the response was invalid
      */
     INVALID_JSON,

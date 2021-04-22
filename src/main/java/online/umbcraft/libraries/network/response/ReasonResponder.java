@@ -49,10 +49,11 @@ public abstract class ReasonResponder {
     /**
      * Returns whether or not this remote RSA public key is recognized
      *
+     * @param remote_public_b64 the public RSA key of the incoming message's host
      * @return if the RSA key is known
      */
-    public final boolean isKnown(String remote_public) {
-        return known.contains(remote_public);
+    public final boolean isKnown(String remote_public_b64) {
+        return known.contains(remote_public_b64);
     }
 
 

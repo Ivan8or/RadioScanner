@@ -61,6 +61,7 @@ public class ReasonMessage extends RadioMessage {
      * @param public_key  public RSA key in base64
      * @param private_key private RSA key in base64
      * @return itself
+     * @throws InvalidKeySpecException if either of the provided keys are not valid RSA
      */
     public ReasonMessage setRSAKeys(String public_key, String private_key) throws InvalidKeySpecException {
         return setRSAKeys(new HelpfulRSAKeyPair(public_key, private_key));
@@ -91,7 +92,7 @@ public class ReasonMessage extends RadioMessage {
 
 
     /**
-     * encrypts and sends itself to a specified IP and port
+     * <p> encrypts and sends itself to a {@link ReasonResponder} at a specified IP and port </p>
      *
      * @param IP   the destination IPv4 address
      * @param port the destination port
@@ -210,6 +211,14 @@ public class ReasonMessage extends RadioMessage {
     }
 
 
+    /**
+     * <p> adds a new key/value pair to the message </p>
+     * reserved keys: 'reason'
+     *
+     * @param key message key
+     * @param val message value
+     * @return itself
+     */
     @Override
     public ReasonMessage put(String key, String val) {
         if (key.equals("reason")) throw new IllegalArgumentException("reserved key");

@@ -76,7 +76,6 @@ public class RadioMessage {
     }
 
 
-
     /**
      * combines itself with a second {@link RadioMessage}
      * absorbs any new key/value pairs for which this did not yet contain the key

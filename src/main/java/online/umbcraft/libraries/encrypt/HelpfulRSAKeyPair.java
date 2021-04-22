@@ -43,6 +43,7 @@ public class HelpfulRSAKeyPair {
      *
      * @param pub_key_b64  the public RSA key encoded in base64
      * @param priv_key_b64 the private RSA key encoded in base64
+     * @throws InvalidKeySpecException if either key is not valid RSA
      */
     public HelpfulRSAKeyPair(String pub_key_b64, String priv_key_b64) throws InvalidKeySpecException {
 
@@ -69,6 +70,7 @@ public class HelpfulRSAKeyPair {
      *
      * @param pub_b64 the public RSA key encoded in base64
      * @return the created PublicKey object
+     * @throws InvalidKeySpecException if the key is not a valid RSA key
      */
     public static PublicKey publicFrom64(String pub_b64) throws InvalidKeySpecException {
 
@@ -89,6 +91,7 @@ public class HelpfulRSAKeyPair {
      *
      * @param priv_b64 the private RSA key encoded in base64
      * @return the created PrivateKey object
+     * @throws InvalidKeySpecException if the key is not a valid RSA key
      */
     public static PrivateKey privateFrom64(String priv_b64) throws InvalidKeySpecException {
 

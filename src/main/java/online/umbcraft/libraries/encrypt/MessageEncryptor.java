@@ -59,7 +59,7 @@ public class MessageEncryptor {
      * @param signature_b64 the signature in question (encoded in base64)
      * @return whether or not the signature is valid
      * @throws InvalidKeyException if key is bad
-     * @throws SignatureException if something went wrong while signing
+     * @throws SignatureException  if something went wrong while signing
      */
     public static boolean verifySignature(HelpfulRSAKeyPair pair, String input, String signature_b64) throws InvalidKeyException, SignatureException {
         return verifySignature(pair.pub(), input, signature_b64);
@@ -74,7 +74,7 @@ public class MessageEncryptor {
      * @param signature_b64 the signature in question (encoded in base64)
      * @return whether or not the signature is valid
      * @throws InvalidKeyException if key is bad
-     * @throws SignatureException if something went wrong while signing
+     * @throws SignatureException  if something went wrong while signing
      */
     public static boolean verifySignature(PublicKey key, String input, String signature_b64) throws InvalidKeyException, SignatureException {
         try {
