@@ -20,6 +20,13 @@ public enum RadioError {
 
 
     /**
+     * the reason specified in plaintext
+     * did not match the reason given in the body
+     */
+    REASON_MISMATCH,
+
+
+    /**
      * the {@link ReasonResponder} errored while responding to this message
      */
     ERROR_ON_RESPONSE,

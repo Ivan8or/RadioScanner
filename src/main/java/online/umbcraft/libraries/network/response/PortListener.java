@@ -166,6 +166,7 @@ public class PortListener extends Thread {
                     ReasonResponder responder = responders.get(job.getRemoteReason());
                     if (responder == null) throw new IllegalStateException("no valid reason specified");
 
+
                     error = RadioError.UNKNOWN_HOST;
                     if (!responder.isKnown(job.getRemotePub64()))
                         throw new IllegalStateException("host key is not recognized");
@@ -183,6 +184,10 @@ public class PortListener extends Thread {
 
                     error = RadioError.INVALID_JSON;
                     ReasonMessage message = new ReasonMessage(job.getRemoteBody());
+
+                    error = RadioError.REASON_MISMATCH;
+                    if(!message.getReason().equals(job.getRemoteReason()))
+                        throw new IllegalStateException("plaintext reason and encrypted reason do not match");
 
                     error = RadioError.ERROR_ON_RESPONSE;
                     ResponseMessage response = respond(message);
