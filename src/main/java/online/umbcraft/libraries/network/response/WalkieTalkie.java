@@ -2,8 +2,8 @@ package online.umbcraft.libraries.network.response;
 
 import online.umbcraft.libraries.network.message.RadioMessage;
 
+import java.util.HashMap;
 import java.util.Map;
-import java.util.TreeMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.logging.Logger;
@@ -34,7 +34,7 @@ public class WalkieTalkie {
      */
     public WalkieTalkie() {
 
-        scanners = new TreeMap<>();
+        scanners = new HashMap<>();
     }
 
 

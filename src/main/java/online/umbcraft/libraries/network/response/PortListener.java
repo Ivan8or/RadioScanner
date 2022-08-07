@@ -13,8 +13,8 @@ import java.net.Socket;
 import java.security.InvalidKeyException;
 import java.security.PublicKey;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.Map;
-import java.util.TreeMap;
 import java.util.logging.Logger;
 
 
@@ -43,7 +43,7 @@ public class PortListener extends Thread {
      */
     public PortListener(WalkieTalkie talkie, int port) {
         this.talkie = talkie;
-        responders = new TreeMap<>();
+        responders = new HashMap<>();
         this.PORT = port;
     }
 
