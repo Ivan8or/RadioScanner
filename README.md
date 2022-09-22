@@ -18,7 +18,7 @@ maven repo / dependencies:
         <dependency>
             <groupId>online.umbcraft.libraries</groupId>
             <artifactId>RadioScanner</artifactId>
-            <version>3.0.6</version>
+            <version>3.0.7</version>
         </dependency>
 </dependencies>
 ```
