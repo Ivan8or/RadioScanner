@@ -23,7 +23,6 @@ dependencies {
     testImplementation 'junit:junit:4.12'
     implementation 'commons-codec:commons-codec:1.14'
     implementation 'com.konghq:unirest-java:3.11.02'
-    implementation 'online.umbcraft.libraries:ProcessTimer:1.3'
 }
 
 group = 'online.umbcraft.libraries'

@@ -1,6 +1,5 @@
 package online.umbcraft.libraries.network.message;
 
-import online.umbcraft.libraries.ProcessTimer;
 import online.umbcraft.libraries.network.RadioSocket;
 import online.umbcraft.libraries.network.response.ReasonResponder;
 import online.umbcraft.libraries.network.response.WalkieTalkie;
@@ -100,8 +99,6 @@ public class ReasonMessage extends RadioMessage {
      */
     public Future<ResponseMessage> send(String IP, int port) {
 
-        ProcessTimer timer = new ProcessTimer();
-
         if (debug)
             logger.info("sending message " + message + " to " + IP + ":" + port);
 
@@ -140,8 +137,6 @@ public class ReasonMessage extends RadioMessage {
 
                 error = RadioError.BAD_CRYPT_KEY;
                 job.decodeRemote(keypair.priv());
-
-                if (debug) logger.info("message to " + IP + ":" + port + " took " + timer.time() + " ms");
 
                 error = RadioError.INVALID_JSON;
                 toReturn = new ResponseMessage(job.getRemoteBody());
